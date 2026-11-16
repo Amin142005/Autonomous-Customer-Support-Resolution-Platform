@@ -1,4 +1,26 @@
-
-
-
 .venv
+
+# Local environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Python and test artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# Local data and databases
+data/
+*.db
+
+# Local Terraform state and variable files
+*.tfstate
+*.tfstate.*
+*.tfplan
+terraform.tfvars
+terraform.tfvars.json
+backend.hcl

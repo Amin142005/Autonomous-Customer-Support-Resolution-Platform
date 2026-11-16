@@ -127,15 +127,15 @@ Cases live in `datasets/eval_cases.json` and each case needs a valid `expected_c
 
 Update each row in place. Do not mark a row done from intention.
 
-| Surface | State on 2026-10-25 |
+| Surface | State on 2026-11-16 |
 |---|---|
-| Repository contents | Requirement files are in place. P1-1 is merged. P1-2 adds health routes, request-id middleware, and `tests/api/test_health.py`. Sample data and the rest of the backend are absent. `frontend/lib/types.ts` is still created in P12-2. |
-| Implemented | P1-1 merged: cached settings and JSON logging. P1-2, not merged: `GET /health`, `GET /health/live` (no dependency I/O), `GET /health/ready` (configuration probes, 503 when degraded), `RequestIdMiddleware`, and CORS exposing `X-Request-ID`. The pytest harness, Makefile, and `.env.example` are still absent. Ready probes do not open a database, Redis, Qdrant, or LLM connection. |
-| Validated locally | `tests/unit/test_config_logging.py` and `tests/api/test_health.py`: 24 passed on this machine. `make test` and `make demo` do not exist yet. This is not a Phase 1 exit. |
+| Repository contents | P1-1 settings/logging implementation and focused tests are present locally. P1-2 health routes/request-id middleware, P1-3 offline harness, and P1-4 Makefile/`.env.example` are absent in this checkout. Application layers beyond P1-1 are not present. |
+| Implemented | P1-1 locally: cached environment settings, redacted settings dumps, JSON logs with request/workflow context, and secret redaction. The changes are not merged. |
+| Validated locally | `tests/unit/test_config_logging.py`: 5 passed using the local Python 3.13 virtual environment. `make test` and `make demo` do not exist yet. This is not a Phase 1 exit. |
 | Cloud credentials | None used. |
 | Applied to a real account | Nothing. |
 | GitHub Actions | Workflow files are not in the repo. None have been executed. |
-| Phase plan | Phase 1 is in progress (P1-1 merged, P1-2 implemented locally). Phases 2–13 are not started. |
+| Phase plan | Phase 1 remains in progress (P1-1 complete locally; P1-2 through P1-4 pending). Phases 2–13 are not started. |
 
 ## Open questions from `CLAUDE.md` §20
 
