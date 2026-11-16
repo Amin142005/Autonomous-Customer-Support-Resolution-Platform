@@ -320,8 +320,12 @@ tags, summary) → `chunk_article` → embeddings → vector store + BM25 → `r
   expire in 8 h.
 - **Rate limit (N2):** fixed window per client in Redis, `RATE_LIMIT_PER_MINUTE` (demo 120).
 - **Audit (N6):** `AuditMiddleware` writes `audit_logs` for every non-GET request.
-- **Request IDs (N3):** `RequestIdMiddleware` reads/creates `X-Request-ID`; exposed through CORS.
-- Middleware order (outermost last): CORS → RequestId → RateLimit → Audit.
+- **Request IDs (N3):** `RequestIdMiddleware` validates or creates `X-Request-ID`, binds it to
+  `log_context`, and adds it to every HTTP response, including CORS preflights and errors. CORS exposes
+  the header to browsers.
+- **Middleware wrapping:** `RequestIdMiddleware` wraps the CORS-enabled FastAPI app so it can label
+  responses produced before route dispatch or by error handling. Rate-limit and audit middleware stay
+  inside that wrapper; every state-changing request must still pass through audit.
 
 ---
 
@@ -331,7 +335,8 @@ tags, summary) → `chunk_article` → embeddings → vector store + BM25 → `r
 - Startup (`main.py`): `setup_logging()` (JSON logs with `request_id`/`workflow_id`), middleware, lifespan
   (`create_tables()`, `bootstrap_demo_data()` when `DEMO_MODE=true` and DB empty).
 - Routers mounted under `/api/v1`. Health routes unprefixed: `/health`, `/health/live` (no I/O, used by
-  probes), `/health/ready` (db, redis, vector store, llm).
+  probes), `/health/ready` (configuration checks for db, redis, vector store, and llm until their
+  clients exist; replace with live dependency probes as those clients are implemented).
 - Settings: `get_settings()` is `lru_cache`d – restart the server after `.env` changes.
 - Errors: `{ "detail": string }` with proper status codes. 409 when a ticket is already
   `waiting_on_approval`; 409 when resuming a run that is not paused.

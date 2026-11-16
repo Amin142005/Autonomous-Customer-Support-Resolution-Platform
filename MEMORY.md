@@ -24,7 +24,7 @@ Durable facts for this repository. `CLAUDE.md` wins if this file drifts. Update 
 - Image tags equal the git SHA once delivery exists. Nothing has been built or tagged yet.
 - Stage 17 (Agentic DevOps) is optional and depends on stages 13–16. It is outside core Project 1 completion.
 - 2026-10-25 — F14 / observability: process settings are `get_settings()` in `backend/app/core/config.py` (cached). JSON logs come from `setup_logging()` and `log_context()` in `backend/app/core/logging.py`. Every line includes `request_id` and `workflow_id` (`null` when unset). `model_dump()` redacts secrets and URL passwords; connection code reads the attributes.
-- 2026-10-25 — N3: `RequestIdMiddleware` echoes a safe `X-Request-ID` or assigns a UUID, binds `log_context`, and sets the header on application responses, including 404 and 500. CORS sits outside it and exposes the header. `/health` and `/health/live` do not probe dependencies. `/health/ready` returns 200 `ready` or 503 `degraded` from configuration checks until the database, Redis, vector store, and LLM clients exist. Those details never include a URL, password, or API key.
+- 2026-11-16 — P1-2 / N3: `RequestIdMiddleware` accepts only safe, bounded `X-Request-ID` values, otherwise assigns a UUID, binds `log_context`, and adds the ID to HTTP responses including preflight, 404, and 500. CORS exposes the response header. `/health` and `/health/live` do no dependency I/O. `/health/ready` checks configuration only until database, Redis, vector-store, and LLM clients are implemented; it never returns connection details or secrets.
 
 ## Roles
 
@@ -120,7 +120,7 @@ Cases live in `datasets/eval_cases.json` and each case needs a valid `expected_c
 - Demo rate limit: `RATE_LIMIT_PER_MINUTE=120`.
 - `QDRANT_COLLECTION=clouddesk_knowledge`.
 - `get_settings()` is cached. A `.env` change requires a server restart.
-- Middleware order, outermost last: CORS → RequestId → RateLimit → Audit.
+- RequestIdMiddleware wraps the CORS-enabled FastAPI app so request IDs also cover preflight/error responses; rate-limit and audit middleware remain inside that wrapper.
 - Health: `/health`, `/health/live` (no I/O), `/health/ready` (db, redis, vector store, llm).
 
 ## Honest status
@@ -129,13 +129,13 @@ Update each row in place. Do not mark a row done from intention.
 
 | Surface | State on 2026-11-16 |
 |---|---|
-| Repository contents | P1-1 settings/logging implementation and focused tests are present locally. P1-2 health routes/request-id middleware, P1-3 offline harness, and P1-4 Makefile/`.env.example` are absent in this checkout. Application layers beyond P1-1 are not present. |
-| Implemented | P1-1 locally: cached environment settings, redacted settings dumps, JSON logs with request/workflow context, and secret redaction. The changes are not merged. |
-| Validated locally | `tests/unit/test_config_logging.py`: 5 passed using the local Python 3.13 virtual environment. `make test` and `make demo` do not exist yet. This is not a Phase 1 exit. |
+| Repository contents | P1-1 settings/logging and P1-2 health/request-ID implementation and tests are present locally. P1-3 offline harness and P1-4 Makefile/`.env.example` are absent in this checkout. Application layers beyond the runtime skeleton are not present. |
+| Implemented | P1-1 and P1-2 locally: cached settings, JSON logging, health routes, safe request IDs, and CORS header exposure. The changes are not merged. Readiness is configuration-only until dependency clients exist. |
+| Validated locally | `tests/unit/test_config_logging.py` and `tests/api/test_health.py`: 13 passed using the local Python 3.13 virtual environment. `make test` and `make demo` do not exist yet. This is not a Phase 1 exit. |
 | Cloud credentials | None used. |
 | Applied to a real account | Nothing. |
 | GitHub Actions | Workflow files are not in the repo. None have been executed. |
-| Phase plan | Phase 1 remains in progress (P1-1 complete locally; P1-2 through P1-4 pending). Phases 2–13 are not started. |
+| Phase plan | Phase 1 remains in progress (P1-1 and P1-2 complete locally; P1-3 and P1-4 pending). Phases 2–13 are not started. |
 
 ## Open questions from `CLAUDE.md` §20
 

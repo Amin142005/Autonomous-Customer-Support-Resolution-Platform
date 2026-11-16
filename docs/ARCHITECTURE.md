@@ -74,8 +74,9 @@ endpoint after output validation. All integrations remain mocks in v1.
 
 ## Request and trust boundaries
 
-- CORS wraps request-ID, rate-limit, and audit middleware in the order specified by
-  `CLAUDE.md`. Every response exposes `X-Request-ID`.
+- `RequestIdMiddleware` wraps the CORS-enabled FastAPI app, adding an ID even to
+  preflight and error responses. CORS exposes `X-Request-ID` to the browser. Rate-limit
+  and audit middleware remain inside the request-ID wrapper.
 - API routes enforce `viewer < agent < admin` server-side. UI controls are not an
   authorization boundary.
 - Ticket text and retrieved content are untrusted data, even when they contain
