@@ -41,7 +41,7 @@ Channel:   email | chat | web | api
 |---|---|---|
 | `GET /health` | Basic service health | `200 { "status": "ok" }` |
 | `GET /health/live` | Liveness probe; no dependency I/O | `200 { "status": "ok" }` |
-| `GET /health/ready` | Dependency readiness | `200 { "status": "ready" }` or `503 { "status": "degraded", "checks": {...} }` |
+| `GET /health/ready` | Configuration readiness for database, Redis, vector store, and LLM; replace with live probes when clients exist | `200 { "status": "ready" }` or `503 { "status": "degraded", "checks": {...} }` |
 
 Readiness details must not contain credentials, connection strings, or secret values.
 
