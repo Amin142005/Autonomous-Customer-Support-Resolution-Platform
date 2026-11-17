@@ -144,6 +144,9 @@ class TicketMessage(Base):
     author_id: Mapped[str | None] = mapped_column(String(36))
     body: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now
+    )
 
     ticket: Mapped[Ticket] = relationship(back_populates="messages")
 
@@ -174,6 +177,9 @@ class Incident(Base):
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     details: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now
+    )
 
 
 class WorkflowRun(Base):
@@ -204,6 +210,9 @@ class WorkflowEvent(Base):
     duration_ms: Mapped[int | None] = mapped_column(Integer)
     token_usage: Mapped[dict[str, Any] | None] = mapped_column(JSON)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now
+    )
 
     ticket: Mapped[Ticket] = relationship(back_populates="events")
     workflow: Mapped[WorkflowRun | None] = relationship()
@@ -221,6 +230,9 @@ class ResolutionAction(Base):
     result: Mapped[dict[str, Any] | None] = mapped_column(JSON)
     approved_by: Mapped[str | None] = mapped_column(ForeignKey("profiles.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now
+    )
 
     ticket: Mapped[Ticket] = relationship(back_populates="resolution_actions")
 
@@ -238,6 +250,9 @@ class ApprovalRequest(Base):
     reason: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now
+    )
 
     ticket: Mapped[Ticket] = relationship(back_populates="approval_requests")
 
@@ -285,3 +300,6 @@ class AuditLog(Base):
     request_id: Mapped[str | None] = mapped_column(String(128))
     data: Mapped[dict[str, Any] | None] = mapped_column(JSON)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now
+    )
