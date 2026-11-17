@@ -28,6 +28,7 @@ Durable facts for this repository. `CLAUDE.md` wins if this file drifts. Update 
 - 2026-11-17 — P1-3 / F14: `tests/conftest.py` forces deterministic offline test settings before app imports, with in-memory SQLite/checkpoint storage, fake providers, and in-memory vector/Redis settings. Pytest config enables automatic asyncio mode with a session-scoped fixture loop.
 - 2026-11-17 — P2-1 / data foundation: portable SQLAlchemy 2 entities are defined in `backend/app/models/entities.py`, with the ten-value `Category` enum plus shared severity, status, channel, and role enums in `backend/app/schemas/common.py`; SQLite table creation was verified locally.
 - 2026-11-17 — P2-2 / PostgreSQL persistence: `database/schema.sql` and migration `0001_initial_schema.sql` define all 16 model tables and update-time triggers. `database/rls_policies.sql` and migration `0002_enable_rls.sql` grant authenticated support roles read-only access; writes remain server-side through `service_role`.
+- 2026-11-17 — P2-3 / repository layer: async SQLAlchemy repositories cover all 16 mapped entities, keep transaction commits with their caller, and provide customer/ticket/workflow/catalog/audit queries. SQLite async CRUD and query behavior is covered by focused tests.
 
 ## Roles
 
@@ -132,13 +133,13 @@ Update each row in place. Do not mark a row done from intention.
 
 | Surface | State on 2026-11-17 |
 |---|---|
-| Repository contents | P1-1 through P1-4, P2-1, and P2-2 implementations are present locally. P2-3, P2-4, and later phases are not present. |
-| Implemented | P1-1 through P1-4 locally: cached settings, JSON logging, health routes, safe request IDs, CORS header exposure, offline pytest configuration, Makefile setup/test/lint/backend targets, and a complete placeholder-only environment example. P2-1 adds SQLAlchemy 2 entities and shared domain enums. P2-2 adds PostgreSQL schema, RLS, and immutable initial migrations. The changes are not merged. |
-| Validated locally | P2-2 focused schema/entity tests pass (7 tests), and Ruff passes. Schema/migration table coverage matches SQLAlchemy metadata, all tables have update triggers, and migrations contain no destructive table/column/schema drops. `.env.example` contains every `Settings` field. GNU Make is unavailable in this environment, so targets were validated by running their commands directly rather than invoking `make`. `make demo` does not exist yet. |
+| Repository contents | P1-1 through P1-4 and P2-1 through P2-3 implementations are present locally. P2-4 and later phases are not present. |
+| Implemented | P1-1 through P1-4 locally: cached settings, JSON logging, health routes, safe request IDs, CORS header exposure, offline pytest configuration, Makefile setup/test/lint/backend targets, and a complete placeholder-only environment example. P2-1 adds SQLAlchemy 2 entities and shared domain enums. P2-2 adds PostgreSQL schema, RLS, and immutable initial migrations. P2-3 adds async repositories for all mapped entities. The changes are not merged. |
+| Validated locally | P2-2 focused schema/entity tests pass (7 tests), and P2-3 async repository SQLite tests pass (3 tests); Ruff passes. Schema/migration table coverage matches SQLAlchemy metadata, all tables have update triggers, and migrations contain no destructive table/column/schema drops. `.env.example` contains every `Settings` field. GNU Make is unavailable in this environment, so targets were validated by running their commands directly rather than invoking `make`. `make demo` does not exist yet. |
 | Cloud credentials | None used. |
 | Applied to a real account | Nothing. |
 | GitHub Actions | Workflow files are not in the repo. None have been executed. |
-| Phase plan | Phase 1 remains complete locally. Phase 2 is in progress: P2-1 and P2-2 are complete locally; P2-3 and P2-4 are not started. Phases 3–13 are not started. |
+| Phase plan | Phase 1 remains complete locally. Phase 2 is in progress: P2-1 through P2-3 are complete locally; P2-4 is not started. Phases 3–13 are not started. |
 
 ## Open questions from `CLAUDE.md` §20
 
