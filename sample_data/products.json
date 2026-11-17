@@ -1,0 +1,26 @@
+[
+  {
+    "id": "40000000-0000-4000-8000-000000000001",
+    "name": "CloudDesk Collaboration",
+    "description": "Team messaging, channels, and shared workspaces.",
+    "metadata_json": {"area": "collaboration"}
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000002",
+    "name": "CloudDesk Files",
+    "description": "Cloud file storage, sharing, and retention.",
+    "metadata_json": {"area": "storage"}
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000003",
+    "name": "CloudDesk API",
+    "description": "REST API access and integration tools.",
+    "metadata_json": {"area": "api"}
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000004",
+    "name": "CloudDesk Billing",
+    "description": "Plans, seats, invoices, and payment methods.",
+    "metadata_json": {"area": "billing"}
+  }
+]

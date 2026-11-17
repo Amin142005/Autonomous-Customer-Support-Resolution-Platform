@@ -1,22 +1,38 @@
 from __future__ import annotations
 
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 
 from fastapi import FastAPI
+from sqlalchemy.ext.asyncio import async_sessionmaker
+
 from starlette.middleware.cors import CORSMiddleware
 from starlette.types import ASGIApp
 
 from backend.app.api.health import router as health_router
 from backend.app.core.config import get_settings
+from backend.app.core.database import create_database_engine, create_tables
 from backend.app.core.logging import setup_logging
 from backend.app.middleware.request_id import RequestIdMiddleware
+from backend.app.services.seed_service import bootstrap_demo_data
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     setup_logging()
-    yield
+    settings = get_settings()
+    engine = create_database_engine(settings.database_url)
+    session_factory = async_sessionmaker(engine, expire_on_commit=False)
+    app.state.database_engine = engine
+    app.state.session_factory = session_factory
+    try:
+        await create_tables(engine)
+        if settings.demo_mode:
+            async with session_factory() as session:
+                await bootstrap_demo_data(session, settings.sample_data_dir)
+        yield
+    finally:
+        await engine.dispose()
 
 
 def create_app() -> ASGIApp:

@@ -1,0 +1,58 @@
+[
+  {
+    "id": "30000000-0000-4000-8000-000000000001",
+    "customer_id": "10000000-0000-4000-8000-000000000001",
+    "name": "Northstar HQ",
+    "status": "active",
+    "settings": {"sso_enabled": true, "external_sharing": false}
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000002",
+    "customer_id": "10000000-0000-4000-8000-000000000002",
+    "name": "Cedar Design",
+    "status": "active",
+    "settings": {"sso_enabled": false, "external_sharing": true}
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000003",
+    "customer_id": "10000000-0000-4000-8000-000000000003",
+    "name": "Finch Analytics",
+    "status": "active",
+    "settings": {"sso_enabled": false, "external_sharing": true}
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000004",
+    "customer_id": "10000000-0000-4000-8000-000000000004",
+    "name": "Alder Research",
+    "status": "active",
+    "settings": {"sso_enabled": false, "external_sharing": false}
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000005",
+    "customer_id": "10000000-0000-4000-8000-000000000005",
+    "name": "Mosaic Studio",
+    "status": "active",
+    "settings": {"sso_enabled": false, "external_sharing": true}
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000006",
+    "customer_id": "10000000-0000-4000-8000-000000000006",
+    "name": "Redwood Campus",
+    "status": "active",
+    "settings": {"sso_enabled": false, "external_sharing": true}
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000007",
+    "customer_id": "10000000-0000-4000-8000-000000000007",
+    "name": "Juniper Free",
+    "status": "active",
+    "settings": {"sso_enabled": false, "external_sharing": false}
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000008",
+    "customer_id": "10000000-0000-4000-8000-000000000008",
+    "name": "Orbit Legacy",
+    "status": "active",
+    "settings": {"sso_enabled": true, "external_sharing": false}
+  }
+]

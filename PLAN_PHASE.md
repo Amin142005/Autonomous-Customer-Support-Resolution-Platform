@@ -10,7 +10,7 @@ when a phase's status changes.
 | Phase | Name | Status |
 |---|---|---|
 | 1 | Runtime skeleton | In progress |
-| 2 | Persistence and demo data | In progress |
+| 2 | Persistence and demo data | Complete |
 | 3 | Identity and request guards | Not started |
 | 4 | Support API | Not started |
 | 5 | Knowledge pipeline | Not started |
