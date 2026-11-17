@@ -23,7 +23,8 @@ def restore_root_logging() -> Generator[None, None, None]:
     root_logger.setLevel(original_level)
 
 
-def test_settings_have_offline_safe_defaults():
+def test_settings_have_offline_safe_defaults(monkeypatch):
+    monkeypatch.delenv("DATABASE_URL", raising=False)
     settings = Settings(_env_file=None)
 
     assert settings.llm_provider == "fake"
