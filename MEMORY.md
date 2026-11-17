@@ -25,6 +25,7 @@ Durable facts for this repository. `CLAUDE.md` wins if this file drifts. Update 
 - Stage 17 (Agentic DevOps) is optional and depends on stages 13–16. It is outside core Project 1 completion.
 - 2026-10-25 — F14 / observability: process settings are `get_settings()` in `backend/app/core/config.py` (cached). JSON logs come from `setup_logging()` and `log_context()` in `backend/app/core/logging.py`. Every line includes `request_id` and `workflow_id` (`null` when unset). `model_dump()` redacts secrets and URL passwords; connection code reads the attributes.
 - 2026-11-16 — P1-2 / N3: `RequestIdMiddleware` accepts only safe, bounded `X-Request-ID` values, otherwise assigns a UUID, binds `log_context`, and adds the ID to HTTP responses including preflight, 404, and 500. CORS exposes the response header. `/health` and `/health/live` do no dependency I/O. `/health/ready` checks configuration only until database, Redis, vector-store, and LLM clients are implemented; it never returns connection details or secrets.
+- 2026-11-17 — P1-3 / F14: `tests/conftest.py` forces deterministic offline test settings before app imports, with in-memory SQLite/checkpoint storage, fake providers, and in-memory vector/Redis settings. Pytest config enables automatic asyncio mode with a session-scoped fixture loop.
 
 ## Roles
 
@@ -127,15 +128,15 @@ Cases live in `datasets/eval_cases.json` and each case needs a valid `expected_c
 
 Update each row in place. Do not mark a row done from intention.
 
-| Surface | State on 2026-11-16 |
+| Surface | State on 2026-11-17 |
 |---|---|
-| Repository contents | P1-1 settings/logging and P1-2 health/request-ID implementation and tests are present locally. P1-3 offline harness and P1-4 Makefile/`.env.example` are absent in this checkout. Application layers beyond the runtime skeleton are not present. |
-| Implemented | P1-1 and P1-2 locally: cached settings, JSON logging, health routes, safe request IDs, and CORS header exposure. The changes are not merged. Readiness is configuration-only until dependency clients exist. |
-| Validated locally | `tests/unit/test_config_logging.py` and `tests/api/test_health.py`: 13 passed using the local Python 3.13 virtual environment. `make test` and `make demo` do not exist yet. This is not a Phase 1 exit. |
+| Repository contents | P1-1 settings/logging, P1-2 health/request-ID, and P1-3 offline harness implementations and tests are present locally. P1-4 Makefile/`.env.example` is pending. Application layers beyond the runtime skeleton are not present. |
+| Implemented | P1-1, P1-2, and P1-3 locally: cached settings, JSON logging, health routes, safe request IDs, CORS header exposure, and isolated offline pytest configuration. The changes are not merged. Readiness is configuration-only until dependency clients exist. |
+| Validated locally | `.venv\Scripts\python.exe -m pytest -q`: 14 passed with deliberately non-offline parent environment settings, confirming conftest overrides them. `make test` and `make demo` do not exist yet. This is not a Phase 1 exit. |
 | Cloud credentials | None used. |
 | Applied to a real account | Nothing. |
 | GitHub Actions | Workflow files are not in the repo. None have been executed. |
-| Phase plan | Phase 1 remains in progress (P1-1 and P1-2 complete locally; P1-3 and P1-4 pending). Phases 2–13 are not started. |
+| Phase plan | Phase 1 remains in progress (P1-1 through P1-3 complete locally; P1-4 pending). Phases 2–13 are not started. |
 
 ## Open questions from `CLAUDE.md` §20
 
