@@ -11,6 +11,7 @@ dependencies = [
     "python-dotenv>=1.0,<2",
     "sqlalchemy[asyncio]>=2.0,<3",
     "aiosqlite>=0.20,<1",
+    "asyncpg>=0.29,<1",
     "uvicorn[standard]>=0.30,<1",
 ]
 

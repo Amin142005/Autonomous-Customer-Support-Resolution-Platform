@@ -14,7 +14,10 @@ defined in [CLAUDE.md](./CLAUDE.md).
   and validation procedure.
 - [Architecture](./docs/ARCHITECTURE.md) — system boundaries and runtime flow.
 - [API contract](./docs/API_CONTRACT.md) — route and payload contract.
+- [Database setup](./database/README.md) — PostgreSQL schema, RLS, migrations, and seed instructions.
+- [Demo fixtures](./sample_data/README.md) — offline customer-support records.
 
-The repository is currently at the planning/runtime-skeleton stage. Treat documented
-components as target architecture unless their implementation and validation are
-confirmed in the codebase.
+The repository currently includes the runtime foundation and Phase 2 persistence
+work: SQLAlchemy entities, PostgreSQL schema/RLS/migrations, async repositories, and
+an offline demo-data bootstrap. Later application phases remain planned until their
+implementation and validation are confirmed.

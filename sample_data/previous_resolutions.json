@@ -1,0 +1,57 @@
+[
+  {
+    "id": "CASE-001",
+    "category": "login_issue",
+    "subject": "Users unable to complete SSO login",
+    "resolution": "Confirmed the identity provider configuration and restored the affected connection.",
+    "steps": [
+      "Confirm whether the issue affects one user or the entire workspace.",
+      "Check the identity provider status and recent configuration changes.",
+      "Escalate a confirmed multi-user outage to the identity team."
+    ]
+  },
+  {
+    "id": "CASE-002",
+    "category": "billing",
+    "subject": "Seat count differs from current assignments",
+    "resolution": "Explained the billing-cycle seat calculation and submitted a refund request for human review when eligible.",
+    "steps": [
+      "Compare billed seats with the invoice period and seat-change history.",
+      "Explain the applicable billing policy with a knowledge citation.",
+      "Require approval before submitting a refund request."
+    ]
+  },
+  {
+    "id": "CASE-003",
+    "category": "api_failure",
+    "subject": "Scheduled API sync receives rate limits",
+    "resolution": "Adjusted the sync schedule to use documented exponential backoff and checked the account's plan limits.",
+    "steps": [
+      "Review request frequency and the response headers.",
+      "Use exponential backoff and respect the documented rate limit.",
+      "Escalate persistent 429 responses after the retry policy is applied."
+    ]
+  },
+  {
+    "id": "CASE-004",
+    "category": "storage_quota",
+    "subject": "File upload blocked by workspace quota",
+    "resolution": "Reviewed storage usage and explained the options available under the current plan.",
+    "steps": [
+      "Confirm the workspace's current usage and quota.",
+      "Identify large or duplicated files without deleting customer data.",
+      "Explain plan options and request approval before any account change."
+    ]
+  },
+  {
+    "id": "CASE-005",
+    "category": "integration",
+    "subject": "Third-party integration stopped syncing",
+    "resolution": "Reconnected the integration after the customer confirmed the authorization flow.",
+    "steps": [
+      "Check CloudDesk service health and the integration status.",
+      "Review whether the third-party authorization expired.",
+      "Get customer confirmation before reconnecting an account."
+    ]
+  }
+]

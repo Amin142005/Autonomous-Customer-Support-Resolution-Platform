@@ -1,0 +1,58 @@
+[
+  {
+    "id": "10000000-0000-4000-8000-000000000001",
+    "name": "Avery Morgan",
+    "email": "avery.morgan@example.test",
+    "company": "Northstar Labs",
+    "plan": "enterprise"
+  },
+  {
+    "id": "10000000-0000-4000-8000-000000000002",
+    "name": "Jordan Lee",
+    "email": "jordan.lee@example.test",
+    "company": "Cedar Design",
+    "plan": "business"
+  },
+  {
+    "id": "10000000-0000-4000-8000-000000000003",
+    "name": "Morgan Patel",
+    "email": "morgan.patel@example.test",
+    "company": "Finch Analytics",
+    "plan": "pro"
+  },
+  {
+    "id": "10000000-0000-4000-8000-000000000004",
+    "name": "Casey Nguyen",
+    "email": "casey.nguyen@example.test",
+    "company": "Alder Health",
+    "plan": "business"
+  },
+  {
+    "id": "10000000-0000-4000-8000-000000000005",
+    "name": "Riley Brooks",
+    "email": "riley.brooks@example.test",
+    "company": "Mosaic Studio",
+    "plan": "pro"
+  },
+  {
+    "id": "10000000-0000-4000-8000-000000000006",
+    "name": "Taylor Kim",
+    "email": "taylor.kim@example.test",
+    "company": "Redwood Education",
+    "plan": "business"
+  },
+  {
+    "id": "10000000-0000-4000-8000-000000000007",
+    "name": "Drew Wilson",
+    "email": "drew.wilson@example.test",
+    "company": "Juniper Works",
+    "plan": "free"
+  },
+  {
+    "id": "10000000-0000-4000-8000-000000000008",
+    "name": "Quinn Davis",
+    "email": "quinn.davis@example.test",
+    "company": "Orbit Systems",
+    "plan": "enterprise"
+  }
+]
