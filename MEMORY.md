@@ -26,6 +26,7 @@ Durable facts for this repository. `CLAUDE.md` wins if this file drifts. Update 
 - 2026-10-25 — F14 / observability: process settings are `get_settings()` in `backend/app/core/config.py` (cached). JSON logs come from `setup_logging()` and `log_context()` in `backend/app/core/logging.py`. Every line includes `request_id` and `workflow_id` (`null` when unset). `model_dump()` redacts secrets and URL passwords; connection code reads the attributes.
 - 2026-11-16 — P1-2 / N3: `RequestIdMiddleware` accepts only safe, bounded `X-Request-ID` values, otherwise assigns a UUID, binds `log_context`, and adds the ID to HTTP responses including preflight, 404, and 500. CORS exposes the response header. `/health` and `/health/live` do no dependency I/O. `/health/ready` checks configuration only until database, Redis, vector-store, and LLM clients are implemented; it never returns connection details or secrets.
 - 2026-11-17 — P1-3 / F14: `tests/conftest.py` forces deterministic offline test settings before app imports, with in-memory SQLite/checkpoint storage, fake providers, and in-memory vector/Redis settings. Pytest config enables automatic asyncio mode with a session-scoped fixture loop.
+- 2026-11-17 — P2-1 / data foundation: portable SQLAlchemy 2 entities are defined in `backend/app/models/entities.py`, with the ten-value `Category` enum plus shared severity, status, channel, and role enums in `backend/app/schemas/common.py`; SQLite table creation was verified locally.
 
 ## Roles
 
@@ -130,13 +131,13 @@ Update each row in place. Do not mark a row done from intention.
 
 | Surface | State on 2026-11-17 |
 |---|---|
-| Repository contents | P1-1 settings/logging, P1-2 health/request-ID, P1-3 offline harness, and P1-4 Makefile/`.env.example` implementations are present locally. Application layers beyond the runtime skeleton are not present. |
-| Implemented | P1-1 through P1-4 locally: cached settings, JSON logging, health routes, safe request IDs, CORS header exposure, offline pytest configuration, Makefile setup/test/lint/backend targets, and a complete placeholder-only environment example. The changes are not merged. Readiness is configuration-only until dependency clients exist. |
-| Validated locally | `.venv\Scripts\python.exe -m pytest -q`: 14 passed; Ruff check passed; `.env.example` parsed successfully and contains every `Settings` field. GNU Make is unavailable in this environment, so targets were validated by running their commands directly rather than invoking `make`. `make demo` does not exist yet. Phase 1 remains in progress pending Makefile invocation verification. |
+| Repository contents | P1-1 through P1-4 and P2-1 implementations are present locally. P2-2 through P2-4 and later phases are not present. |
+| Implemented | P1-1 through P1-4 locally: cached settings, JSON logging, health routes, safe request IDs, CORS header exposure, offline pytest configuration, Makefile setup/test/lint/backend targets, and a complete placeholder-only environment example. P2-1 adds SQLAlchemy 2 entities and shared domain enums. The changes are not merged. |
+| Validated locally | P2-1 entity tests pass (3 focused tests); focused and existing project validation will be run in the final test pass. `.env.example` contains every `Settings` field. GNU Make is unavailable in this environment, so targets were validated by running their commands directly rather than invoking `make`. `make demo` does not exist yet. |
 | Cloud credentials | None used. |
 | Applied to a real account | Nothing. |
 | GitHub Actions | Workflow files are not in the repo. None have been executed. |
-| Phase plan | Phase 1 remains in progress (P1-1 through P1-4 complete locally; GNU Make invocation verification is pending). Phases 2–13 are not started. |
+| Phase plan | Phase 1 remains complete locally. Phase 2 is in progress: P2-1 is complete locally, while P2-2 through P2-4 are not started. Phases 3–13 are not started. |
 
 ## Open questions from `CLAUDE.md` §20
 
