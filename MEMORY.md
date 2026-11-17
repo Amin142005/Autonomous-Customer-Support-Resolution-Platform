@@ -130,13 +130,13 @@ Update each row in place. Do not mark a row done from intention.
 
 | Surface | State on 2026-11-17 |
 |---|---|
-| Repository contents | P1-1 settings/logging, P1-2 health/request-ID, and P1-3 offline harness implementations and tests are present locally. P1-4 Makefile/`.env.example` is pending. Application layers beyond the runtime skeleton are not present. |
-| Implemented | P1-1, P1-2, and P1-3 locally: cached settings, JSON logging, health routes, safe request IDs, CORS header exposure, and isolated offline pytest configuration. The changes are not merged. Readiness is configuration-only until dependency clients exist. |
-| Validated locally | `.venv\Scripts\python.exe -m pytest -q`: 14 passed with deliberately non-offline parent environment settings, confirming conftest overrides them. `make test` and `make demo` do not exist yet. This is not a Phase 1 exit. |
+| Repository contents | P1-1 settings/logging, P1-2 health/request-ID, P1-3 offline harness, and P1-4 Makefile/`.env.example` implementations are present locally. Application layers beyond the runtime skeleton are not present. |
+| Implemented | P1-1 through P1-4 locally: cached settings, JSON logging, health routes, safe request IDs, CORS header exposure, offline pytest configuration, Makefile setup/test/lint/backend targets, and a complete placeholder-only environment example. The changes are not merged. Readiness is configuration-only until dependency clients exist. |
+| Validated locally | `.venv\Scripts\python.exe -m pytest -q`: 14 passed; Ruff check passed; `.env.example` parsed successfully and contains every `Settings` field. GNU Make is unavailable in this environment, so targets were validated by running their commands directly rather than invoking `make`. `make demo` does not exist yet. Phase 1 remains in progress pending Makefile invocation verification. |
 | Cloud credentials | None used. |
 | Applied to a real account | Nothing. |
 | GitHub Actions | Workflow files are not in the repo. None have been executed. |
-| Phase plan | Phase 1 remains in progress (P1-1 through P1-3 complete locally; P1-4 pending). Phases 2–13 are not started. |
+| Phase plan | Phase 1 remains in progress (P1-1 through P1-4 complete locally; GNU Make invocation verification is pending). Phases 2–13 are not started. |
 
 ## Open questions from `CLAUDE.md` §20
 
