@@ -3,6 +3,13 @@ from rag.embeddings import (
     FakeEmbeddings,
     create_embeddings,
 )
+from rag.retriever import (
+    Evidence,
+    HybridRetriever,
+    Reranker,
+    RetrievalCache,
+    retrieve,
+)
 from rag.vector_store import (
     InMemoryVectorStore,
     QdrantVectorStore,
@@ -14,12 +21,17 @@ from rag.vector_store import (
 
 __all__ = [
     "EmbeddingProvider",
+    "Evidence",
     "FakeEmbeddings",
+    "HybridRetriever",
     "InMemoryVectorStore",
     "QdrantVectorStore",
+    "Reranker",
+    "RetrievalCache",
     "VectorDocument",
     "VectorSearchResult",
     "VectorStoreService",
     "create_embeddings",
     "create_vector_store",
+    "retrieve",
 ]
