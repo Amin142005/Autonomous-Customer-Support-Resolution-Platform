@@ -1,10 +1,25 @@
-from backend.app.schemas.common import Category
-from rag.chunking import Article, Chunk, chunk_article, load_article_files
+from rag.embeddings import (
+    EmbeddingProvider,
+    FakeEmbeddings,
+    create_embeddings,
+)
+from rag.vector_store import (
+    InMemoryVectorStore,
+    QdrantVectorStore,
+    VectorDocument,
+    VectorSearchResult,
+    VectorStoreService,
+    create_vector_store,
+)
 
 __all__ = [
-    "Article",
-    "Category",
-    "Chunk",
-    "chunk_article",
-    "load_article_files",
+    "EmbeddingProvider",
+    "FakeEmbeddings",
+    "InMemoryVectorStore",
+    "QdrantVectorStore",
+    "VectorDocument",
+    "VectorSearchResult",
+    "VectorStoreService",
+    "create_embeddings",
+    "create_vector_store",
 ]
