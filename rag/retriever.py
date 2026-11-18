@@ -139,6 +139,7 @@ class HybridRetriever:
             raise ValueError("snippet_max_chars must be positive")
         self.vector_store = vector_store
         self.documents = tuple(documents)
+        self._document_ids = {document.id for document in self.documents}
         self.reranker = reranker
         self.cache = cache or RetrievalCache()
         self.rrf_k = rrf_k
@@ -187,7 +188,9 @@ class HybridRetriever:
                 filters=vector_filters,
             )
             semantic_results = [
-                result for result in semantic_results if result.score > 0
+                result
+                for result in semantic_results
+                if result.id in self._document_ids and result.score > 0
             ]
 
         keyword_results = (

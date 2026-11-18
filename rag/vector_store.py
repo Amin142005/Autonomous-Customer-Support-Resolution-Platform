@@ -45,6 +45,9 @@ class VectorStoreService(Protocol):
     async def delete(self, ids: list[str]) -> int:
         ...
 
+    async def clear(self) -> int:
+        ...
+
     async def count(self) -> int:
         ...
 
@@ -141,6 +144,11 @@ class InMemoryVectorStore:
             if document_id in self._documents:
                 del self._documents[document_id]
                 deleted += 1
+        return deleted
+
+    async def clear(self) -> int:
+        deleted = len(self._documents)
+        self._documents.clear()
         return deleted
 
     async def delete_by_article(self, article_id: str) -> int:
@@ -305,6 +313,17 @@ class QdrantVectorStore:
             points_selector=models.PointIdsList(points=ids),
         )
         return len(ids)
+
+    async def clear(self) -> int:
+        client = self._client_instance()
+        collections = await client.get_collections()
+        names = {collection.name for collection in collections.collections}
+        if self.collection not in names:
+            return 0
+
+        result = await client.count(collection_name=self.collection)
+        await client.delete_collection(collection_name=self.collection)
+        return int(result.count)
 
     async def count(self) -> int:
         client = self._client_instance()

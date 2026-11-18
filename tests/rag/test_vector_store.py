@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 import pytest
 
 from rag.embeddings import FakeEmbeddings
@@ -70,6 +72,8 @@ async def test_in_memory_store_add_search_filter_delete_and_count():
     remaining = await store.search("billing", top_k=5)
     assert len(remaining) == 1
     assert remaining[0].id == "refund"
+    assert await store.clear() == 1
+    assert await store.count() == 0
 
 
 async def test_explicit_vectors_and_delete_by_article():
@@ -114,3 +118,23 @@ def test_vector_store_factory():
         qdrant_url="http://127.0.0.1:6333",
     )
     assert isinstance(qdrant, QdrantVectorStore)
+
+
+async def test_qdrant_clear_deletes_only_the_configured_collection():
+    class FakeQdrantClient:
+        async def get_collections(self):
+            return SimpleNamespace(
+                collections=[SimpleNamespace(name="clouddesk_knowledge")]
+            )
+
+        async def count(self, *, collection_name):
+            assert collection_name == "clouddesk_knowledge"
+            return SimpleNamespace(count=7)
+
+        async def delete_collection(self, *, collection_name):
+            assert collection_name == "clouddesk_knowledge"
+
+    store = QdrantVectorStore(url="http://qdrant.test")
+    store._client = FakeQdrantClient()
+
+    assert await store.clear() == 7

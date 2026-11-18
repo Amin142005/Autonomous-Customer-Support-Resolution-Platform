@@ -211,9 +211,16 @@ Search request:
 { "query": "<question>", "category": "<optional category>", "mode": "hybrid", "top_k": 5 }
 ```
 
-`mode` is `hybrid`, `semantic`, or `keyword`. Each evidence item contains `id`, `title`,
-`source` (`kb://slug#section`), `snippet`, `score`, `url`, and `article_id`. Article
-content is treated as untrusted input.
+`mode` is `hybrid`, `semantic`, or `keyword`; `top_k` is between 1 and 20.
+
+The list response is `{ "items": [KnowledgeArticleSummary, ...] }`. A summary
+contains `id`, `slug`, `title`, `category`, `tags`, and `summary`. The article
+detail route returns those fields plus the Markdown `content`. Search returns
+`{ "items": [Evidence, ...] }`; each evidence item contains `id`, `title`,
+`source` (`kb://slug#section`), `snippet`, `score`, `url`, and `article_id`.
+`POST /api/v1/knowledge/reindex` is admin-only and returns
+`{ "articles_indexed": number, "chunks_indexed": number }`. Article content is
+treated as untrusted input.
 
 ## Escalations, agents, audit, settings, and MCP
 
