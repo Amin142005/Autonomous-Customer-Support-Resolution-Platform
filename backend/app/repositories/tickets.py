@@ -74,15 +74,20 @@ class TicketRepository(BaseRepository[Ticket]):
         *,
         exclude_ticket_id: str | None = None,
         limit: int = 20,
+        offset: int = 0,
     ) -> list[Ticket]:
         if limit < 1:
             raise ValueError("limit must be greater than zero")
+        if offset < 0:
+            raise ValueError("offset cannot be negative")
 
         statement = select(Ticket).where(Ticket.customer_id == customer_id)
         if exclude_ticket_id is not None:
             statement = statement.where(Ticket.id != exclude_ticket_id)
         statement = (
-            statement.order_by(Ticket.created_at.desc()).limit(limit)
+            statement.order_by(Ticket.created_at.desc())
+            .limit(limit)
+            .offset(offset)
         )
         result = await self.session.scalars(statement)
         return list(result.all())

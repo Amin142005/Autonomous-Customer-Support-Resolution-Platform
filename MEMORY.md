@@ -32,6 +32,7 @@ Durable facts for this repository. `CLAUDE.md` wins if this file drifts. Update 
 - 2026-11-18 — P2-4 / demo bootstrap: deterministic fixtures provide three demo profiles, eight customers and related records, thirteen scenario tickets/messages, products, and an active incident. Startup creates tables and seeds only an empty database when `DEMO_MODE=true`; PostgreSQL seed SQL is generated from the same fixtures.
 - 2026-11-18 — P4-1 / support API contract: ticket creation and ticket/customer response shapes are defined in Pydantic schemas and mirrored in `docs/API_CONTRACT.md` and `frontend/lib/types.ts`. Ticket creation requires exactly one of `customer_id` or `customer`; P4-2 and P4-3 routes remain pending.
 - 2026-11-18 — P4-2 / ticket API: repository-backed list, detail, and create routes are implemented with viewer/agent RBAC. Creation links or creates a customer, validates workspace ownership, creates the original customer message, assigns the next `CD-*` number, and commits atomically. P4-3 customer routes remain pending.
+- 2026-11-18 — P4-3 / customer API: repository-backed viewer-readable customer list, detail/context, and ticket-history routes are implemented. Customer detail exposes subscriptions, workspaces, newest tickets, and up to ten memory notes with secret/card redaction; history uses customer-scoped pagination.
 
 ## Roles
 

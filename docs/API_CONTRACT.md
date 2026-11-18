@@ -180,6 +180,7 @@ must have an approval record before execution.
 
 Customer responses include only fields needed by support workflows and the console.
 Memory responses contain scrubbed notes and never secrets or raw ticket bodies.
+Customer list and history support `limit` (1–100) and `offset` query parameters.
 
 Customer detail fields:
 

@@ -12,7 +12,7 @@ when a phase's status changes.
 | 1 | Runtime skeleton | In progress |
 | 2 | Persistence and demo data | Complete |
 | 3 | Identity and request guards | Not started |
-| 4 | Support API | Not started |
+| 4 | Support API | Complete |
 | 5 | Knowledge pipeline | Not started |
 | 6 | Tools and policy | Not started |
 | 7 | Rules and guardrails | Not started |
