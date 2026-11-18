@@ -15,6 +15,16 @@ class TicketRepository(BaseRepository[Ticket]):
         statement = select(Ticket).where(Ticket.number == number)
         return await self.session.scalar(statement)
 
+    async def next_ticket_number(self) -> str:
+        statement = select(Ticket.number)
+        result = await self.session.scalars(statement)
+        highest = 1000
+        for number in result.all():
+            suffix = number.rpartition("-")[2]
+            if suffix.isdigit():
+                highest = max(highest, int(suffix))
+        return f"CD-{highest + 1}"
+
     async def get_detail(self, ticket_id: str) -> Ticket | None:
         statement = (
             select(Ticket)

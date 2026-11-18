@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from backend.app.schemas.common import (
     Category,
@@ -54,6 +54,8 @@ class TicketCreate(BaseModel):
 
 
 class TicketCustomerSummary(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     name: str
     email: str
@@ -62,12 +64,16 @@ class TicketCustomerSummary(BaseModel):
 
 
 class TicketWorkspaceSummary(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     name: str
     status: str
 
 
 class TicketMessageResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     ticket_id: str
     author_type: str
@@ -77,6 +83,8 @@ class TicketMessageResponse(BaseModel):
 
 
 class TicketSummary(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     number: str
     customer_id: str
