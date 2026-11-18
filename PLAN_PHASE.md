@@ -13,7 +13,7 @@ when a phase's status changes.
 | 2 | Persistence and demo data | Complete |
 | 3 | Identity and request guards | Not started |
 | 4 | Support API | Complete |
-| 5 | Knowledge pipeline | Not started |
+| 5 | Knowledge pipeline | In progress |
 | 6 | Tools and policy | Not started |
 | 7 | Rules and guardrails | Not started |
 | 8 | Specialist agents | Not started |
