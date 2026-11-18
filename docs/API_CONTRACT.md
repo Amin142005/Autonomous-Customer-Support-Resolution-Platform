@@ -116,6 +116,9 @@ Alternatively, provide `customer` instead of `customer_id`:
 
 Exactly one customer source (`customer_id` or `customer`) is required. `subject`,
 `body`, and `channel` are required; unknown or empty required values return `422`.
+Ticket creation succeeds with `201 Created` and returns
+`{ "ticket": { ...TicketDetail... } }`. Missing customers or workspaces return
+`404`; mismatched workspaces are rejected as a missing customer workspace.
 
 Ticket list items and ticket detail use these fields:
 
