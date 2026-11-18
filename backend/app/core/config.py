@@ -82,10 +82,15 @@ class Settings(BaseSettings):
 
     @property
     def effective_jwt_secret(self) -> str:
-        return (
+        configured = (
             self.supabase_jwt_secret.get_secret_value()
             or self.jwt_secret.get_secret_value()
         )
+        if configured:
+            return configured
+        if self.demo_mode:
+            return "clouddesk-demo-only-local-secret"
+        return ""
 
     def model_dump(self, **kwargs: Any) -> dict[str, Any]:
         return _redact_dump(super().model_dump(**kwargs))
