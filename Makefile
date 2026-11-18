@@ -13,7 +13,7 @@ BOOTSTRAP_PYTHON ?= python
 
 export PYTHONPATH
 
-.PHONY: setup test lint backend
+.PHONY: setup test lint backend ingest
 
 setup:
 	$(BOOTSTRAP_PYTHON) -m venv .venv
@@ -29,3 +29,6 @@ lint:
 
 backend:
 	$(PYTHON) -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
+
+ingest:
+	$(PYTHON) -m backend.app.cli.ingest_knowledge

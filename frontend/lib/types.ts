@@ -134,3 +134,48 @@ export interface CustomerDetail extends CustomerSummary {
 export interface CustomerListResponse {
   items: CustomerSummary[];
 }
+
+export interface KnowledgeArticleSummary {
+  id: string;
+  slug: string;
+  title: string;
+  category: Category;
+  tags: string[];
+  summary: string;
+}
+
+export interface KnowledgeArticle extends KnowledgeArticleSummary {
+  content: string;
+}
+
+export interface KnowledgeArticleListResponse {
+  items: KnowledgeArticleSummary[];
+}
+
+export type KnowledgeSearchMode = "hybrid" | "semantic" | "keyword";
+
+export interface KnowledgeSearchRequest {
+  query: string;
+  category?: Category;
+  mode?: KnowledgeSearchMode;
+  top_k?: number;
+}
+
+export interface KnowledgeEvidence {
+  id: string;
+  title: string;
+  source: string;
+  snippet: string;
+  score: number;
+  url: string;
+  article_id: string;
+}
+
+export interface KnowledgeSearchResponse {
+  items: KnowledgeEvidence[];
+}
+
+export interface KnowledgeReindexResponse {
+  articles_indexed: number;
+  chunks_indexed: number;
+}

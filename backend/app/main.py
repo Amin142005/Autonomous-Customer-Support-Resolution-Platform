@@ -11,6 +11,7 @@ from starlette.types import ASGIApp
 from backend.app.api.auth import router as auth_router
 from backend.app.api.customers import router as customers_router
 from backend.app.api.health import router as health_router
+from backend.app.api.knowledge import router as knowledge_router
 from backend.app.api.tickets import router as tickets_router
 from backend.app.core.config import get_settings
 from backend.app.core.database import create_database_engine, create_tables
@@ -18,6 +19,7 @@ from backend.app.core.logging import setup_logging
 from backend.app.middleware.audit import AuditMiddleware
 from backend.app.middleware.rate_limit import RateLimitMiddleware
 from backend.app.middleware.request_id import RequestIdMiddleware
+from backend.app.services.knowledge_service import KnowledgeService
 from backend.app.services.seed_service import bootstrap_demo_data
 
 
@@ -34,6 +36,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         if settings.demo_mode:
             async with session_factory() as session:
                 await bootstrap_demo_data(session, settings.sample_data_dir)
+        knowledge_service = KnowledgeService.from_settings(settings)
+        await knowledge_service.initialize()
+        app.state.knowledge_service = knowledge_service
         yield
     finally:
         await engine.dispose()
@@ -46,6 +51,7 @@ def create_app() -> ASGIApp:
     fastapi_app.include_router(auth_router, prefix="/api/v1")
     fastapi_app.include_router(tickets_router, prefix="/api/v1")
     fastapi_app.include_router(customers_router, prefix="/api/v1")
+    fastapi_app.include_router(knowledge_router, prefix="/api/v1")
 
     cors_app = CORSMiddleware(
         app=fastapi_app,
