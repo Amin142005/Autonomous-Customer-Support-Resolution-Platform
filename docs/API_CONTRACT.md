@@ -86,6 +86,49 @@ Ticket creation accepts `subject`, `body`, `channel`, and either a customer iden
 or the customer fields required to create/link one. The channel must be one of the
 shared values. The response includes the created ticket.
 
+Ticket creation request:
+
+```json
+{
+  "subject": "<subject>",
+  "body": "<ticket body>",
+  "channel": "email",
+  "customer_id": "<customer id>",
+  "workspace_id": "<optional workspace id>"
+}
+```
+
+Alternatively, provide `customer` instead of `customer_id`:
+
+```json
+{
+  "subject": "<subject>",
+  "body": "<ticket body>",
+  "channel": "web",
+  "customer": {
+    "name": "<customer name>",
+    "email": "<customer email>",
+    "company": "<optional company>",
+    "plan": "<optional plan>"
+  }
+}
+```
+
+Exactly one customer source (`customer_id` or `customer`) is required. `subject`,
+`body`, and `channel` are required; unknown or empty required values return `422`.
+
+Ticket list items and ticket detail use these fields:
+
+```text
+TicketSummary: id, number, customer_id, workspace_id, subject, body, channel,
+category, severity, status, summary, assignee_id, created_at, updated_at
+```
+
+Ticket detail additionally includes `customer`, `workspace`, and `messages`.
+Messages contain `id`, `ticket_id`, `author_type`, `author_id`, `body`, and
+`created_at`. List endpoints return `{ "items": [...] }`; filters are `status`,
+`category`, and `severity`, with `limit` and `offset` pagination parameters.
+
 Workflow run response (`202 Accepted`):
 
 ```json
@@ -134,6 +177,20 @@ must have an approval record before execution.
 
 Customer responses include only fields needed by support workflows and the console.
 Memory responses contain scrubbed notes and never secrets or raw ticket bodies.
+
+Customer detail fields:
+
+```text
+CustomerDetail: id, name, email, company, plan, subscriptions, workspaces,
+tickets, memory
+```
+
+Subscriptions include `id`, `customer_id`, `plan`, `status`, `seats`,
+`monthly_price`, `created_at`, and `updated_at`. Workspaces include `id`,
+`customer_id`, `name`, `status`, `settings`, `created_at`, and `updated_at`.
+Safe memory items include `id`, `type`, `content`, `source_ticket_id`, and
+`created_at`. Customer list and history endpoints return `{ "items": [...] }`;
+history is ordered newest first.
 
 ## Knowledge
 
