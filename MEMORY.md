@@ -34,6 +34,7 @@ Durable facts for this repository. `CLAUDE.md` wins if this file drifts. Update 
 - 2026-11-18 — P4-2 / ticket API: repository-backed list, detail, and create routes are implemented with viewer/agent RBAC. Creation links or creates a customer, validates workspace ownership, creates the original customer message, assigns the next `CD-*` number, and commits atomically. P4-3 customer routes remain pending.
 - 2026-11-18 — P4-3 / customer API: repository-backed viewer-readable customer list, detail/context, and ticket-history routes are implemented. Customer detail exposes subscriptions, workspaces, newest tickets, and up to ten memory notes with secret/card redaction; history uses customer-scoped pagination.
 - 2026-11-18 — P5-2 / vector store and fake embeddings: deterministic 384-dimension hashed bag-of-words `FakeEmbeddings`, the async vector-store protocol, in-memory cosine-search storage, and a configurable Qdrant adapter are implemented. Focused tests cover deterministic vectors, document order, filtering, delete/count, explicit vectors, and memory/Qdrant factories.
+- 2026-11-18 — P5-3 / hybrid retriever: semantic and BM25 keyword retrieval are combined with reciprocal-rank fusion (`k=60`), title/category heuristics, category filters, article-level deduplication, optional validated reranking, and a bounded 300-second cache. Sixteen RAG tests and Ruff pass locally. Tests use synthetic documents because P5-1 article/chunk fixtures are empty on this branch; no live Qdrant or LLM reranker was used.
 
 ## Roles
 
@@ -138,13 +139,13 @@ Update each row in place. Do not mark a row done from intention.
 
 | Surface | State on 2026-11-18 |
 |---|---|
-| Repository contents | P1 through P4 implementations are present locally. P5-2 fake embeddings and memory/Qdrant vector stores are present; P5-1 article/chunk implementation and P5-3/P5-4 remain pending. |
-| Implemented | P1 provides settings, logging, health, request IDs, offline pytest, Makefile and environment template work. P2 provides SQLAlchemy entities, PostgreSQL schema/RLS/migrations, repositories, fixtures and demo seeding. P3 provides JWT/RBAC, demo auth, Redis/fakeredis limiting and audit middleware. P4 provides ticket/customer contracts and repository-backed APIs. P5-2 provides hashed fake embeddings, in-memory cosine search, and a configurable Qdrant adapter. P5-1 article/chunk implementation remains pending. The changes are not merged. |
-| Validated locally | P4 focused API tests and P5-2 vector-store tests pass; Ruff checks pass. Qdrant client import/factory validation passes locally, but no live Qdrant service was used. Full offline tests remain to be run. No live PostgreSQL database was used. `.env.example` contains every `Settings` field. GNU Make is unavailable in this environment, so targets were validated by running underlying commands directly rather than invoking `make`. `make demo` does not exist yet. |
+| Repository contents | P1 through P4 implementations are present locally. P5-2 vector stores and P5-3 hybrid retrieval are present; P5-1 article/chunk implementation and P5-4 ingest/API remain pending. |
+| Implemented | P1 provides settings, logging, health, request IDs, offline pytest, Makefile and environment template work. P2 provides SQLAlchemy entities, PostgreSQL schema/RLS/migrations, repositories, fixtures and demo seeding. P3 provides JWT/RBAC, demo auth, Redis/fakeredis limiting and audit middleware. P4 provides ticket/customer contracts and repository-backed APIs. P5-2 provides fake embeddings and in-memory/Qdrant vector stores; P5-3 provides semantic/BM25 hybrid retrieval, fusion, reranking hooks, article deduplication, and caching. P5-1 article/chunk implementation remains pending. The changes are not merged. |
+| Validated locally | P4 focused API tests, P5-2 vector-store tests, and all 16 tests under `tests/rag` pass; Ruff checks pass for RAG code/tests. RAG tests for P5-3 use synthetic documents because the P5-1 article/chunk fixtures are empty on this branch. No live Qdrant service, LLM reranker, or PostgreSQL database was used. Full offline tests remain to be run. `.env.example` contains every `Settings` field. GNU Make is unavailable in this environment, so targets were validated by running underlying commands directly rather than invoking `make`. `make demo` does not exist yet. |
 | Cloud credentials | None used. |
 | Applied to a real account | Nothing. |
 | GitHub Actions | Workflow files are not in the repo. None have been executed. |
-| Phase plan | Phase 1 remains in progress pending GNU Make invocation verification. Phase 2 persistence and demo data is complete locally (P2-1 through P2-4). Phases 3–13 are not started. |
+| Phase plan | Phase 1 remains in progress pending GNU Make invocation verification. Phase 2 persistence and demo data is complete locally (P2-1 through P2-4). Phase 3 and Phase 4 tasks are implemented locally. Phase 5 is in progress: P5-2 and P5-3 are implemented; P5-1 and P5-4 remain pending. |
 
 ## Open questions from `CLAUDE.md` §20
 
