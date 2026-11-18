@@ -13,6 +13,7 @@ from backend.app.api.health import router as health_router
 from backend.app.core.config import get_settings
 from backend.app.core.database import create_database_engine, create_tables
 from backend.app.core.logging import setup_logging
+from backend.app.middleware.audit import AuditMiddleware
 from backend.app.middleware.rate_limit import RateLimitMiddleware
 from backend.app.middleware.request_id import RequestIdMiddleware
 from backend.app.services.seed_service import bootstrap_demo_data
@@ -50,7 +51,8 @@ def create_app() -> ASGIApp:
         expose_headers=["X-Request-ID"],
     )
     limited_app = RateLimitMiddleware(cors_app)
-    return RequestIdMiddleware(limited_app)
+    audited_app = AuditMiddleware(limited_app)
+    return RequestIdMiddleware(audited_app)
 
 
 app = create_app()
