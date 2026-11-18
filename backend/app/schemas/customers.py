@@ -2,12 +2,14 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from backend.app.schemas.tickets import TicketSummary
 
 
 class SubscriptionResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     customer_id: str
     plan: str
@@ -19,6 +21,8 @@ class SubscriptionResponse(BaseModel):
 
 
 class WorkspaceResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     customer_id: str
     name: str
@@ -29,6 +33,8 @@ class WorkspaceResponse(BaseModel):
 
 
 class CustomerMemoryResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     type: str
     content: str
@@ -37,6 +43,8 @@ class CustomerMemoryResponse(BaseModel):
 
 
 class CustomerSummary(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     name: str
     email: str
