@@ -14,7 +14,7 @@ when a phase's status changes.
 | 3 | Identity and request guards | Not started |
 | 4 | Support API | Complete |
 | 5 | Knowledge pipeline | In progress |
-| 6 | Tools and policy | Not started |
+| 6 | Tools and policy | In progress |
 | 7 | Rules and guardrails | Not started |
 | 8 | Specialist agents | Not started |
 | 9 | Workflow graph and trace | Not started |
