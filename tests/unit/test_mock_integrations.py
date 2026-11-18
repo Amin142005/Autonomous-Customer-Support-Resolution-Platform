@@ -1,4 +1,5 @@
 from decimal import Decimal
+from inspect import iscoroutinefunction
 
 import pytest
 
@@ -89,16 +90,28 @@ async def test_empty_status_configuration_does_not_restore_default_statuses():
 
 async def test_mock_email_never_sends_or_retains_message_body():
     email = MockEmailService()
-    body = "This body is accepted by the mock but not sent."
 
     receipt = await email.send_email(
         "agent@example.test",
         "Support reply",
-        body,
+        "This body is accepted by the mock but not sent.",
     )
 
     assert receipt.message_id == "mock-message-0001"
     assert receipt.status == "simulated"
     assert receipt.simulated
     assert email.simulated_count == 1
-    assert body not in repr(receipt)
+    assert "This body is accepted" not in repr(receipt)
+
+
+@pytest.mark.parametrize(
+    ("adapter", "method_name"),
+    [
+        (MockBillingService(), "create_refund_request"),
+        (MockEmailService(), "send_email"),
+        (MockServiceStatusService(), "check_service_status"),
+        (MockWorkspaceAdminService(), "reset_setting"),
+    ],
+)
+def test_mock_integration_methods_are_async(adapter, method_name):
+    assert iscoroutinefunction(getattr(adapter, method_name))
