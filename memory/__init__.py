@@ -5,6 +5,7 @@ from memory.long_term import (
     LongTermMemory,
     LongTermMemoryError,
 )
+from memory.memory_service import MemoryService
 from memory.short_term import (
     CACHE_TTL_SECONDS,
     CONVERSATION_TTL_SECONDS,
@@ -28,6 +29,7 @@ __all__ = [
     "WORKFLOW_TTL_SECONDS",
     "LongTermMemory",
     "LongTermMemoryError",
+    "MemoryService",
     "ShortTermMemory",
     "conversation_key",
     "rag_cache_key",
