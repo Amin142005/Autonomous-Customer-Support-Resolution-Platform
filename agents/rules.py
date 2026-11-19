@@ -3,7 +3,17 @@ from __future__ import annotations
 import re
 from collections.abc import Iterable, Mapping
 
+from backend.app.core.guardrails import scan_for_injection, wrap_untrusted
 from backend.app.schemas.common import Category, Severity
+
+__all__ = [
+    "ESCALATION_RULES",
+    "matching_escalation_rules",
+    "rule_category",
+    "rule_severity",
+    "scan_for_injection",
+    "wrap_untrusted",
+]
 
 ESCALATION_RULES: dict[str, dict[str, object]] = {
     "security_breach": {
