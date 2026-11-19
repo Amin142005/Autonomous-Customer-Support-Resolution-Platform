@@ -65,6 +65,23 @@ class CustomerMemoryRepository(BaseRepository[CustomerMemory]):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(session, CustomerMemory)
 
+    async def find_exact(
+        self,
+        customer_id: str,
+        *,
+        type: str,
+        content: str,
+        source_ticket_id: str | None = None,
+    ) -> CustomerMemory | None:
+        statement = (
+            select(CustomerMemory)
+            .where(CustomerMemory.customer_id == customer_id)
+            .where(CustomerMemory.type == type)
+            .where(CustomerMemory.content == content)
+            .where(CustomerMemory.source_ticket_id == source_ticket_id)
+        )
+        return await self.session.scalar(statement)
+
     async def list_for_customer(
         self, customer_id: str, *, limit: int = 10
     ) -> list[CustomerMemory]:
