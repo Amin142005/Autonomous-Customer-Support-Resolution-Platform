@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-import re
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.app.core.guardrails import scrub
 from backend.app.repositories.customers import (
     CustomerMemoryRepository,
     CustomerRepository,
@@ -26,20 +25,6 @@ class CustomerServiceError(Exception):
         super().__init__(detail)
         self.detail = detail
         self.status_code = status_code
-
-
-_SECRET_ASSIGNMENT = re.compile(
-    r"(?i)\b(password|api[_ -]?key|token|secret)\b\s*([:=])\s*[^\s,;]+"
-)
-_CARD_NUMBER = re.compile(r"\b(?:\d[ -]*?){13,19}\b")
-
-
-def _scrub_memory(content: str) -> str:
-    content = _SECRET_ASSIGNMENT.sub(
-        lambda match: f"{match.group(1)}{match.group(2)} [REDACTED]",
-        content,
-    )
-    return _CARD_NUMBER.sub("[REDACTED]", content)
 
 
 class CustomerService:
@@ -100,7 +85,7 @@ class CustomerService:
                 CustomerMemoryResponse(
                     id=note.id,
                     type=note.type,
-                    content=_scrub_memory(note.content),
+                    content=scrub(note.content),
                     source_ticket_id=note.source_ticket_id,
                     created_at=note.created_at,
                 )

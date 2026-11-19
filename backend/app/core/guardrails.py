@@ -57,6 +57,50 @@ _INTERNAL_URL = re.compile(
     r")"
 )
 
+_SCRUBBED = "[REDACTED]"
+
+_SECRET_ASSIGNMENT_SCRUB = re.compile(
+    r"(?i)\b(?:password|passwd|api[_ -]?key|access[_ -]?key|"
+    r"secret|token|authorization|credential|private[_ -]?key)\b"
+    r"\s*[:=]\s*"
+    r"(?:Bearer\s+)?(?:\"[^\"]*\"|'[^']*'|[^\s,;]+)"
+)
+_BEARER_TOKEN_SCRUB = re.compile(
+    r"(?i)\bbearer\s+[a-z0-9._~+/=-]+"
+)
+_JWT_TOKEN_SCRUB = re.compile(
+    r"(?i)\bey[a-z0-9_-]*\.[a-z0-9_-]+\.[a-z0-9_-]+\b"
+)
+_URL_CREDENTIALS_SCRUB = re.compile(
+    r"(?i)(\b[a-z][a-z0-9+.-]*://)[^/@\s]+@"
+)
+_SENSITIVE_QUERY_SCRUB = re.compile(
+    r"(?i)([?&](?:password|passwd|pwd|token|api[_-]?key|"
+    r"secret|authorization)=)[^&\s]+"
+)
+_AWS_ACCESS_KEY_SCRUB = re.compile(
+    r"(?<![A-Z0-9])(?:AKIA|ASIA)[A-Z0-9]{16}(?![A-Z0-9])"
+)
+_PRIVATE_KEY_BLOCK_SCRUB = re.compile(
+    r"(?s)-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----"
+    r".*?"
+    r"-----END [A-Z0-9 ]*PRIVATE KEY-----"
+)
+_CARD_NUMBER_SCRUB = re.compile(
+    r"(?<!\d)(?:\d[ -]?){12,18}\d(?!\d)"
+)
+
+SECRET_PATTERNS: tuple[re.Pattern[str], ...] = (
+    _PRIVATE_KEY_BLOCK_SCRUB,
+    _SECRET_ASSIGNMENT_SCRUB,
+    _BEARER_TOKEN_SCRUB,
+    _JWT_TOKEN_SCRUB,
+    _URL_CREDENTIALS_SCRUB,
+    _SENSITIVE_QUERY_SCRUB,
+    _AWS_ACCESS_KEY_SCRUB,
+    _CARD_NUMBER_SCRUB,
+)
+
 
 def scan_for_injection(text: str) -> bool:
     """Return True when text contains likely prompt-injection instructions."""
@@ -147,3 +191,22 @@ def validate_customer_output(
                 break
 
     return not violations, list(dict.fromkeys(violations))
+
+
+def scrub(text: str) -> str:
+    """Remove common secrets and payment identifiers before memory persistence."""
+    if not isinstance(text, str):
+        text = str(text)
+    if not text:
+        return text
+
+    scrubbed = text
+    scrubbed = _PRIVATE_KEY_BLOCK_SCRUB.sub(_SCRUBBED, scrubbed)
+    scrubbed = _SECRET_ASSIGNMENT_SCRUB.sub(_SCRUBBED, scrubbed)
+    scrubbed = _BEARER_TOKEN_SCRUB.sub("Bearer " + _SCRUBBED, scrubbed)
+    scrubbed = _JWT_TOKEN_SCRUB.sub(_SCRUBBED, scrubbed)
+    scrubbed = _URL_CREDENTIALS_SCRUB.sub(r"\1" + _SCRUBBED + "@", scrubbed)
+    scrubbed = _SENSITIVE_QUERY_SCRUB.sub(r"\1" + _SCRUBBED, scrubbed)
+    scrubbed = _AWS_ACCESS_KEY_SCRUB.sub(_SCRUBBED, scrubbed)
+    scrubbed = _CARD_NUMBER_SCRUB.sub(_SCRUBBED, scrubbed)
+    return scrubbed
