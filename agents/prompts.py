@@ -29,6 +29,13 @@ RESOLUTION_PROMPT = (
     "other customer data, or action arguments."
 )
 
+ESCALATION_PROMPT = (
+    "Assess whether the issue requires a named specialist team. Use only the ticket, "
+    "category, severity, and evidence provided. Escalation is allowed only for "
+    "high or critical severity issues with strong supporting confidence. Do not "
+    "invent a policy match or expose customer secrets."
+)
+
 __all__ = [
     "SECURITY_PREAMBLE",
     "SUPERVISOR_CLASSIFICATION_PROMPT",
@@ -36,4 +43,5 @@ __all__ = [
     "SUPERVISOR_TICKET_SUMMARY_PROMPT",
     "TROUBLESHOOTING_PROMPT",
     "RESOLUTION_PROMPT",
+    "ESCALATION_PROMPT",
 ]
