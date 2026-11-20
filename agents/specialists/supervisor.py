@@ -25,6 +25,8 @@ class SupervisorAgent:
     def __init__(self, llm: Any | None = None) -> None:
         self.llm = llm
         self.last_injection_detected = False
+        self.last_usage = LLMUsage()
+        self.last_duration_ms = 0
 
     async def understand(
         self,
@@ -43,12 +45,14 @@ class SupervisorAgent:
             f"{SUPERVISOR_CLASSIFICATION_PROMPT}\n\n"
             f"{wrap_untrusted(ticket_text)}"
         )
-        classification, _, _ = await call_structured(
+        classification, usage, duration_ms = await call_structured(
             Classification,
             prompt,
             llm=self.llm,
             retries=2,
         )
+        self.last_usage = usage
+        self.last_duration_ms = duration_ms
 
         policy_category = rule_category(ticket_text, classification.category)
         try:
@@ -80,12 +84,14 @@ class SupervisorAgent:
             f"{SUPERVISOR_SEVERITY_PROMPT}\n\n"
             f"{wrap_untrusted(ticket_text)}"
         )
-        assessment, _, _ = await call_structured(
+        assessment, usage, duration_ms = await call_structured(
             SeverityAssessment,
             prompt,
             llm=self.llm,
             retries=2,
         )
+        self.last_usage = usage
+        self.last_duration_ms = duration_ms
 
         severity = rule_severity(ticket_text, assessment.severity, category)
         reason = " ".join(assessment.reason.split())
