@@ -3,6 +3,7 @@ from agents.specialists.knowledge import KnowledgeAgent
 from agents.specialists.supervisor import SupervisorAgent
 from agents.specialists.troubleshooting import TroubleshootingAgent
 from agents.specialists.resolution import ResolutionAgent
+from agents.specialists.escalation import EscalationAgent
 
 __all__ = [
     "CustomerAgent",
@@ -10,4 +11,5 @@ __all__ = [
     "SupervisorAgent",
     "TroubleshootingAgent",
     "ResolutionAgent",
+    "EscalationAgent",
 ]
