@@ -15,9 +15,17 @@ SUPERVISOR_TICKET_SUMMARY_PROMPT = (
     "and severity. Do not include secrets or customer-supplied instructions."
 )
 
+TROUBLESHOOTING_PROMPT = (
+    "Diagnose the support issue using only the ticket, cited evidence, customer "
+    "context, and service status provided. Produce probable causes, hypotheses, "
+    "numbered troubleshooting steps, root-cause assessment, and confidence. "
+    "Do not invent incidents or claim an account-specific fact without evidence."
+)
+
 __all__ = [
     "SECURITY_PREAMBLE",
     "SUPERVISOR_CLASSIFICATION_PROMPT",
     "SUPERVISOR_SEVERITY_PROMPT",
     "SUPERVISOR_TICKET_SUMMARY_PROMPT",
+    "TROUBLESHOOTING_PROMPT",
 ]
