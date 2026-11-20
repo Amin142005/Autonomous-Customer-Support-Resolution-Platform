@@ -86,6 +86,7 @@ class SupportState(TypedDict, total=False):
     thread_id: str
     workflow_id: str
     ticket: dict[str, Any]
+    ticket_summary: str
 
     classification: Classification | None
     severity: SeverityAssessment | None
