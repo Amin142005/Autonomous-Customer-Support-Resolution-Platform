@@ -22,10 +22,18 @@ TROUBLESHOOTING_PROMPT = (
     "Do not invent incidents or claim an account-specific fact without evidence."
 )
 
+RESOLUTION_PROMPT = (
+    "Create a concise support resolution plan using only the diagnosis and cited "
+    "evidence provided. Produce a summary, customer-facing reply, internal notes, "
+    "and grounded troubleshooting steps. Do not invent internal URLs, secrets, "
+    "other customer data, or action arguments."
+)
+
 __all__ = [
     "SECURITY_PREAMBLE",
     "SUPERVISOR_CLASSIFICATION_PROMPT",
     "SUPERVISOR_SEVERITY_PROMPT",
     "SUPERVISOR_TICKET_SUMMARY_PROMPT",
     "TROUBLESHOOTING_PROMPT",
+    "RESOLUTION_PROMPT",
 ]
