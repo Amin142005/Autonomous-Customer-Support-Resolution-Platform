@@ -1,4 +1,5 @@
 export type Role = "viewer" | "agent" | "admin";
+
 export type Category =
   | "login_issue"
   | "billing"
@@ -35,6 +36,10 @@ export interface TicketCreateRequest {
   customer_id?: string;
   customer?: TicketCustomerInput;
   workspace_id?: string;
+}
+
+export interface TicketCreateResponse {
+  ticket: TicketDetail;
 }
 
 export interface TicketSummary {
@@ -233,4 +238,61 @@ export interface EscalationResponse {
 
 export interface EscalationListResponse {
   items: EscalationResponse[];
+}
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  full_name: string;
+  role: Role;
+}
+
+export interface DemoTokenRequest {
+  email: string;
+}
+
+export interface DemoTokenResponse {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  user: AuthUser;
+}
+
+export interface MeResponse {
+  id: string;
+  email: string;
+  full_name: string;
+  role: Role;
+}
+
+export interface HealthResponse {
+  status: "ok" | "ready" | "degraded";
+  checks?: Record<string, boolean>;
+}
+
+export interface TicketFilters {
+  status?: TicketStatus;
+  category?: Category;
+  severity?: Severity;
+  limit?: number;
+  offset?: number;
+}
+
+export interface CustomerListFilters {
+  limit?: number;
+  offset?: number;
+}
+
+export interface CustomerTicketFilters {
+  limit?: number;
+  offset?: number;
+}
+
+export interface EscalationFilters {
+  limit?: number;
+  offset?: number;
+}
+
+export interface WorkflowRunResponse {
+  workflow_id: string;
 }
