@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ApiClient, ApiError, NetworkError } from "@/lib/api";
+import { ApiClient, NetworkError } from "@/lib/api";
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -84,9 +84,7 @@ describe("ApiClient", () => {
       setToken: () => undefined,
     });
 
-    await expect(client.getTicket("missing")).rejects.toMatchObject<
-      Partial<ApiError>
-    >({
+    await expect(client.getTicket("missing")).rejects.toMatchObject({
       name: "ApiError",
       status: 404,
       message: "Ticket not found",
