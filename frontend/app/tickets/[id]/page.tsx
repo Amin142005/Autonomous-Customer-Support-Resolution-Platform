@@ -14,6 +14,7 @@ import { StatusPill } from "@/components/ui/StatusPill";
 import { TicketMessagesColumn } from "@/components/tickets/TicketMessagesColumn";
 import { TicketCustomerColumn } from "@/components/tickets/TicketCustomerColumn";
 import { TicketWorkflowPanel } from "@/components/tickets/TicketWorkflowPanel";
+import { TicketActionBar } from "@/components/tickets/TicketActionBar";
 
 export default function TicketDetailPage() {
   const params = useParams<{ id: string }>();
@@ -84,6 +85,23 @@ export default function TicketDetailPage() {
                 events={data.events}
                 canAct={canAct}
               />
+              <div className="mt-4">
+                <TicketActionBar
+                  ticketId={ticketId}
+                  canAct={canAct}
+                  approvalId={
+                    typeof data.workflow?.state.approval_id === "string"
+                      ? data.workflow.state.approval_id
+                      : undefined
+                  }
+                  approvalStatus={
+                    typeof data.workflow?.state.approval_status === "string"
+                      ? data.workflow.state.approval_status
+                      : undefined
+                  }
+                  onUpdated={() => void reload()}
+                />
+              </div>
             </div>
           </div>
 

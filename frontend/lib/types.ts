@@ -296,3 +296,12 @@ export interface EscalationFilters {
 export interface WorkflowRunResponse {
   workflow_id: string;
 }
+
+export interface TicketActionRequest {
+  body: string;
+}
+
+export interface TicketActionResponse {
+  ticket: TicketDetail;
+  message: string;
+}

@@ -118,3 +118,12 @@ class TicketCreateResponse(BaseModel):
 class TicketListResponse(BaseModel):
     items: list[TicketSummary] = Field(default_factory=list)
 
+
+class TicketReplyRequest(BaseModel):
+    body: str = Field(min_length=1, max_length=20000)
+
+
+class TicketActionResponse(BaseModel):
+    ticket: TicketDetail
+    message: str
+

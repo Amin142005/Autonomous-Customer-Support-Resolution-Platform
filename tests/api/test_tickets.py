@@ -356,3 +356,70 @@ async def test_workflow_events_require_viewer_and_preserve_order(tickets_app):
         "node_completed",
     ]
     assert missing.status_code == 404
+
+
+async def test_ticket_actions_require_agent_role(tickets_app):
+    viewer_token = token_for("viewer-id", "vic.viewer@clouddesk.demo", "viewer")
+    agent_token = token_for("agent-id", "sam.agent@clouddesk.demo", "agent")
+
+    async with AsyncClient(
+        transport=ASGITransport(app=tickets_app),
+        base_url="http://testserver",
+    ) as client:
+        forbidden_reply = await client.post(
+            "/api/v1/tickets/ticket-1/reply",
+            json={"body": "Please try signing in again."},
+            headers={"Authorization": f"Bearer {viewer_token}"},
+        )
+        forbidden_info = await client.post(
+            "/api/v1/tickets/ticket-1/request-info",
+            json={"body": "Please provide the affected email."},
+            headers={"Authorization": f"Bearer {viewer_token}"},
+        )
+        forbidden_escalation = await client.post(
+            "/api/v1/tickets/ticket-1/escalate",
+            json={"body": "Needs specialist review."},
+            headers={"Authorization": f"Bearer {viewer_token}"},
+        )
+
+        reply = await client.post(
+            "/api/v1/tickets/ticket-1/reply",
+            json={"body": "Please try signing in again."},
+            headers={"Authorization": f"Bearer {agent_token}"},
+        )
+        request_info = await client.post(
+            "/api/v1/tickets/ticket-1/request-info",
+            json={"body": "Please provide the affected email."},
+            headers={"Authorization": f"Bearer {agent_token}"},
+        )
+        escalation = await client.post(
+            "/api/v1/tickets/ticket-1/escalate",
+            json={"body": "Needs specialist review."},
+            headers={"Authorization": f"Bearer {agent_token}"},
+        )
+
+    assert forbidden_reply.status_code == 403
+    assert forbidden_info.status_code == 403
+    assert forbidden_escalation.status_code == 403
+    assert reply.status_code == 200
+    assert reply.json()["ticket"]["status"] == "waiting_on_customer"
+    assert request_info.status_code == 200
+    assert request_info.json()["ticket"]["status"] == "waiting_on_customer"
+    assert escalation.status_code == 200
+    assert escalation.json()["ticket"]["status"] == "escalated"
+
+
+async def test_reply_rejects_unsafe_customer_output(tickets_app):
+    agent_token = token_for("agent-id", "sam.agent@clouddesk.demo", "agent")
+
+    async with AsyncClient(
+        transport=ASGITransport(app=tickets_app),
+        base_url="http://testserver",
+    ) as client:
+        response = await client.post(
+            "/api/v1/tickets/ticket-1/reply",
+            json={"body": "Password=secret123"},
+            headers={"Authorization": f"Bearer {agent_token}"},
+        )
+
+    assert response.status_code == 422
