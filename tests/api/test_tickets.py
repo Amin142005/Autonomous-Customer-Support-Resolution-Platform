@@ -258,3 +258,41 @@ async def test_create_rejects_missing_customer_and_mismatched_workspace(tickets_
     assert missing_source.status_code == 422
     assert missing_customer.status_code == 404
     assert mismatched_workspace.status_code == 404
+
+
+async def test_run_workflow_requires_agent_and_viewers_can_read_status(tickets_app):
+    viewer_token = token_for(
+        "viewer-id",
+        "vic.viewer@clouddesk.demo",
+        "viewer",
+    )
+    agent_token = token_for(
+        "agent-id",
+        "sam.agent@clouddesk.demo",
+        "agent",
+    )
+
+    async with AsyncClient(
+        transport=ASGITransport(app=tickets_app),
+        base_url="http://testserver",
+    ) as client:
+        forbidden = await client.post(
+            "/api/v1/tickets/ticket-1/run",
+            headers={"Authorization": f"Bearer {viewer_token}"},
+        )
+        started = await client.post(
+            "/api/v1/tickets/ticket-1/run",
+            headers={"Authorization": f"Bearer {agent_token}"},
+        )
+
+        workflow_id = started.json().get("workflow_id")
+        status_response = await client.get(
+            "/api/v1/tickets/ticket-1/workflow",
+            headers={"Authorization": f"Bearer {viewer_token}"},
+        )
+
+    assert forbidden.status_code == 403
+    assert started.status_code == 202
+    assert isinstance(workflow_id, str) and workflow_id
+    assert status_response.status_code == 200
+    assert status_response.json()["workflow_id"] == workflow_id

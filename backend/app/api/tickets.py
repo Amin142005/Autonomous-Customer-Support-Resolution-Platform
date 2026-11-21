@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.core.database import get_session
@@ -19,9 +19,17 @@ from backend.app.schemas.tickets import (
     TicketDetail,
     TicketListResponse,
 )
+from backend.app.schemas.workflow import (
+    WorkflowRunResponse,
+    WorkflowStatusResponse,
+)
 from backend.app.services.ticket_service import (
     TicketService,
     TicketServiceError,
+)
+from backend.app.services.workflow_service import (
+    WorkflowService,
+    WorkflowServiceError,
 )
 
 router = APIRouter(prefix="/tickets", tags=["tickets"])
@@ -79,3 +87,34 @@ async def get_ticket(
         return await TicketService(session).get_detail(ticket_id)
     except TicketServiceError as exc:
         _raise_service_error(exc)
+
+
+@router.post("/{ticket_id}/run", response_model=WorkflowRunResponse, status_code=status.HTTP_202_ACCEPTED)
+async def run_workflow(
+    ticket_id: str,
+    background_tasks: BackgroundTasks,
+    _current_user: AgentUser,
+    session: AsyncSession = Depends(get_session),  # noqa: B008
+) -> WorkflowRunResponse:
+    try:
+        response = await WorkflowService(session).create_run(ticket_id)
+        background_tasks.add_task(
+            WorkflowService(session).start_workflow,
+            ticket_id,
+            response.workflow_id,
+        )
+        return response
+    except WorkflowServiceError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.detail)
+
+
+@router.get("/{ticket_id}/workflow", response_model=WorkflowStatusResponse)
+async def get_workflow(
+    ticket_id: str,
+    _current_user: ViewerUser,
+    session: AsyncSession = Depends(get_session),  # noqa: B008
+) -> WorkflowStatusResponse:
+    try:
+        return await WorkflowService(session).get_status(ticket_id)
+    except WorkflowServiceError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.detail)

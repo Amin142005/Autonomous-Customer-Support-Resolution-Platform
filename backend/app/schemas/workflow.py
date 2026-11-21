@@ -98,6 +98,18 @@ class TokenUsage(BaseModel):
     cost: float = 0.0
 
 
+class WorkflowRunResponse(BaseModel):
+    workflow_id: str
+
+
+class WorkflowStatusResponse(BaseModel):
+    workflow_id: str
+    status: str
+    ticket_id: str
+    thread_id: str | None = None
+    state: dict[str, Any] = Field(default_factory=dict)
+
+
 class StructuredLLMResult(BaseModel):
     output: object
     token_usage: TokenUsage = Field(default_factory=TokenUsage)
@@ -116,4 +128,6 @@ __all__ = [
     "SeverityAssessment",
     "StructuredLLMResult",
     "TokenUsage",
+    "WorkflowRunResponse",
+    "WorkflowStatusResponse",
 ]
