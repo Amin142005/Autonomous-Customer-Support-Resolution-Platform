@@ -6,12 +6,13 @@ from typing import Any
 
 from langgraph.types import Command
 from pydantic import BaseModel
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from agents.checkpointer import create_checkpointer
 from agents.tracer import WorkflowTracer
 from agents.graph import build_support_graph
 from backend.app.core.llm import get_llm
+from backend.app.core.config import get_settings
 from backend.app.models.entities import Ticket, WorkflowRun
 from backend.app.repositories.tickets import TicketRepository
 from backend.app.repositories.workflow import (
@@ -23,6 +24,10 @@ from backend.app.schemas.common import TicketStatus
 from backend.app.schemas.workflow import WorkflowRunResponse, WorkflowStatusResponse
 from backend.app.tools.registry import ToolRegistry
 from backend.app.services.escalation_service import EscalationService
+from backend.app.tools.read_only import register_read_only_tools
+from backend.app.tools.write_tools import register_write_tools
+from backend.app.services.knowledge_service import KnowledgeService
+from integrations.factory import create_integrations
 
 
 class WorkflowServiceError(Exception):
@@ -47,6 +52,25 @@ class WorkflowService:
         self.approvals = ApprovalRequestRepository(session)
         self.tickets = TicketRepository(session)
         self.registry = registry or ToolRegistry()
+        if registry is None:
+            bind = getattr(session, "bind", None)
+            engine = getattr(bind, "engine", bind)
+            if engine is not None:
+                session_factory = async_sessionmaker(engine, expire_on_commit=False)
+                settings = get_settings()
+                knowledge = KnowledgeService.from_settings(settings)
+                integrations = create_integrations()
+                register_read_only_tools(
+                    self.registry,
+                    session_factory=session_factory,
+                    knowledge_service=knowledge,
+                    integrations=integrations,
+                )
+                register_write_tools(
+                    self.registry,
+                    session_factory=session_factory,
+                    integrations=integrations,
+                )
         provider = llm if llm is not None else get_llm()
         self.llm = getattr(provider, "llm", provider)
         self.memory_service = memory_service
@@ -96,7 +120,11 @@ class WorkflowService:
         if run is None:
             raise WorkflowServiceError("Workflow not found", 404)
 
-        initial_state = run.state or await self._initial_state(ticket, workflow_id, workflow_id)
+        initial_state = dict(run.state or await self._initial_state(ticket, workflow_id, workflow_id))
+        initial_state.setdefault("registry", self.registry)
+        initial_state.setdefault("llm", self.llm)
+        initial_state.setdefault("memory_service", self.memory_service)
+
         tracer = WorkflowTracer(
             self.session,
             ticket_id=ticket_id,
@@ -317,6 +345,9 @@ class WorkflowService:
             "thread_id": thread_id,
             "workflow_id": workflow_id,
             "ticket": ticket_data,
+            "registry": self.registry,
+            "llm": self.llm,
+            "memory_service": self.memory_service,
             "completed_nodes": [],
             "errors": [],
         }

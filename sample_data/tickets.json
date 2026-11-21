@@ -17,7 +17,7 @@
     "customer_id": "10000000-0000-4000-8000-000000000002",
     "workspace_id": "30000000-0000-4000-8000-000000000002",
     "subject": "Refund: charged 8 seats, uses 5",
-    "body": "Our latest invoice includes eight seats, but only five are currently assigned. Please review the difference.",
+    "body": "Our latest invoice includes eight seats, but only five are currently assigned. Please review the difference. The requested refund is $60.00 for the three extra seats.",
     "channel": "web",
     "category": "billing",
     "severity": "medium",
