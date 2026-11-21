@@ -8,6 +8,7 @@ from agents.nodes.supervisor import (
     ticket_summary,
     understand_ticket,
 )
+from agents.nodes.resolution import resolution_planning, risk_check
 
 __all__ = [
     "understand_ticket",
@@ -16,4 +17,6 @@ __all__ = [
     "customer_context",
     "knowledge_retrieval",
     "troubleshooting",
+    "resolution_planning",
+    "risk_check",
 ]
