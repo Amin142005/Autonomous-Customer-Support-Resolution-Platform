@@ -220,3 +220,17 @@ export interface ApprovalResponse {
   decided_at: string | null;
   workflow: WorkflowStatusResponse | null;
 }
+
+export interface EscalationResponse {
+  id: string;
+  ticket_id: string;
+  team: string;
+  reason: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EscalationListResponse {
+  items: EscalationResponse[];
+}

@@ -11,6 +11,7 @@ from starlette.types import ASGIApp
 from backend.app.api.approvals import router as approvals_router
 from backend.app.api.auth import router as auth_router
 from backend.app.api.customers import router as customers_router
+from backend.app.api.escalations import router as escalations_router
 from backend.app.api.health import router as health_router
 from backend.app.api.knowledge import router as knowledge_router
 from backend.app.api.tickets import router as tickets_router
@@ -54,6 +55,7 @@ def create_app() -> ASGIApp:
     fastapi_app.include_router(tickets_router, prefix="/api/v1")
     fastapi_app.include_router(customers_router, prefix="/api/v1")
     fastapi_app.include_router(knowledge_router, prefix="/api/v1")
+    fastapi_app.include_router(escalations_router, prefix="/api/v1")
 
     cors_app = CORSMiddleware(
         app=fastapi_app,

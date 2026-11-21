@@ -150,6 +150,20 @@ class StructuredLLMResult(BaseModel):
     duration_ms: float = 0.0
 
 
+class EscalationResponse(BaseModel):
+    id: str
+    ticket_id: str
+    team: str
+    reason: str
+    status: str
+    created_at: datetime
+    updated_at: datetime
+
+
+class EscalationListResponse(BaseModel):
+    items: list[EscalationResponse] = Field(default_factory=list)
+
+
 __all__ = [
     "ActionProposal",
     "ApprovalDecisionRequest",
@@ -158,6 +172,8 @@ __all__ = [
     "CustomerContext",
     "Diagnosis",
     "EscalationDecision",
+    "EscalationResponse",
+    "EscalationListResponse",
     "Evidence",
     "PreviousCase",
     "ResolutionPlan",
