@@ -22,6 +22,7 @@ from backend.app.repositories.workflow import (
 from backend.app.schemas.common import TicketStatus
 from backend.app.schemas.workflow import WorkflowRunResponse, WorkflowStatusResponse
 from backend.app.tools.registry import ToolRegistry
+from backend.app.services.escalation_service import EscalationService
 
 
 class WorkflowServiceError(Exception):

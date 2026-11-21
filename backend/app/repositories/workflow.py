@@ -88,3 +88,15 @@ class EscalationRepository(BaseRepository[Escalation]):
         )
         result = await self.session.scalars(statement)
         return list(result.all())
+
+    async def get_open_for_ticket(self, ticket_id: str) -> Escalation | None:
+        statement = (
+            select(Escalation)
+            .where(
+                Escalation.ticket_id == ticket_id,
+                Escalation.status == "open",
+            )
+            .order_by(Escalation.created_at.desc())
+            .limit(1)
+        )
+        return await self.session.scalar(statement)

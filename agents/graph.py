@@ -67,6 +67,7 @@ async def escalation(state: SupportState) -> dict[str, object]:
     )
     return {
         "escalation": decision,
+        "escalation_required": decision.escalation_required,
         "completed_nodes": ["escalation"],
         "current_node": "escalation",
         "token_usage": agent.last_usage,
