@@ -15,6 +15,7 @@ from backend.app.core.llm import get_llm
 from backend.app.models.entities import Ticket, WorkflowRun
 from backend.app.repositories.tickets import TicketRepository
 from backend.app.repositories.workflow import (
+    ApprovalRequestRepository,
     WorkflowEventRepository,
     WorkflowRunRepository,
 )
@@ -42,6 +43,7 @@ class WorkflowService:
         self.session = session
         self.runs = WorkflowRunRepository(session)
         self.events = WorkflowEventRepository(session)
+        self.approvals = ApprovalRequestRepository(session)
         self.tickets = TicketRepository(session)
         self.registry = registry or ToolRegistry()
         provider = llm if llm is not None else get_llm()
@@ -112,8 +114,65 @@ class WorkflowService:
             ):
                 if isinstance(update, dict):
                     final_state = update
+                    interrupts = update.get("__interrupt__")
+                    interrupt_list = (
+                        list(interrupts)
+                        if isinstance(interrupts, (list, tuple))
+                        else []
+                    )
+
+                    if interrupt_list:
+                        interrupt_value = getattr(interrupt_list[0], "value", interrupt_list[0])
+                        interrupt_payload = (
+                            dict(interrupt_value)
+                            if isinstance(interrupt_value, Mapping)
+                            else {"kind": "human_approval"}
+                        )
+                        actions = interrupt_payload.get("actions", [])
+                        action_items = actions if isinstance(actions, list) else []
+
+                        existing = await self.approvals.get_pending_for_ticket(ticket_id)
+                        approval_id = existing.id if existing is not None else None
+                        if existing is None:
+                            for action in action_items:
+                                if not isinstance(action, Mapping):
+                                    continue
+                                tool_name = str(action.get("tool", "unknown"))
+                                action_args = (
+                                    dict(action.get("arguments", {}))
+                                    if isinstance(action.get("arguments"), Mapping)
+                                    else {}
+                                )
+                                created = await self.approvals.create(
+                                    ticket_id=ticket_id,
+                                    workflow_id=workflow_id,
+                                    action_name=tool_name,
+                                    action_args=action_args,
+                                    status="pending",
+                                )
+                                if approval_id is None:
+                                    approval_id = created.id
+
+                        await self.tickets.update(
+                            ticket,
+                            {"status": TicketStatus.WAITING_ON_APPROVAL},
+                        )
+                        run.status = "paused"
+                        final_state["approval_status"] = "pending"
+                        final_state["paused"] = True
+                        final_state["approval_id"] = approval_id
+                        await tracer.record(
+                            "approval_requested",
+                            payload={"actions": action_items},
+                        )
+
                     run.state = self._safe_state(final_state)
-                    run.status = "paused" if final_state.get("paused") else "completed"
+                    run.status = (
+                        "paused"
+                        if final_state.get("paused")
+                        or interrupt_list
+                        else "completed"
+                    )
 
                     current_node = str(final_state.get("current_node") or "")
                     if current_node and current_node not in previous_started:
@@ -149,7 +208,8 @@ class WorkflowService:
                         )
                     await self.session.flush()
 
-            await tracer.workflow_completed()
+            if run.status != "paused":
+                await tracer.workflow_completed()
             await self.session.commit()
 
         return self._status(run, final_state)
@@ -241,6 +301,7 @@ class WorkflowService:
                 "memory_service",
                 "memory",
                 "llm",
+                "__interrupt__",
             }
         }
 
