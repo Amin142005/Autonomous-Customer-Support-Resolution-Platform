@@ -17,6 +17,8 @@ import type {
   KnowledgeSearchRequest,
   KnowledgeSearchResponse,
   MeResponse,
+  TicketActionRequest,
+  TicketActionResponse,
   TicketCreateRequest,
   TicketCreateResponse,
   TicketDetail,
@@ -344,6 +346,36 @@ export class ApiClient {
   async getEscalation(escalationId: string): Promise<EscalationResponse> {
     return this.request<EscalationResponse>(
       `/api/v1/escalations/${encodeURIComponent(escalationId)}`,
+    );
+  }
+
+  async replyToTicket(
+    ticketId: string,
+    request: TicketActionRequest,
+  ): Promise<TicketActionResponse> {
+    return this.request<TicketActionResponse>(
+      `/api/v1/tickets/${encodeURIComponent(ticketId)}/reply`,
+      { method: "POST", body: JSON.stringify(request) },
+    );
+  }
+
+  async requestTicketInfo(
+    ticketId: string,
+    request: TicketActionRequest,
+  ): Promise<TicketActionResponse> {
+    return this.request<TicketActionResponse>(
+      `/api/v1/tickets/${encodeURIComponent(ticketId)}/request-info`,
+      { method: "POST", body: JSON.stringify(request) },
+    );
+  }
+
+  async escalateTicket(
+    ticketId: string,
+    request: TicketActionRequest,
+  ): Promise<TicketActionResponse> {
+    return this.request<TicketActionResponse>(
+      `/api/v1/tickets/${encodeURIComponent(ticketId)}/escalate`,
+      { method: "POST", body: JSON.stringify(request) },
     );
   }
 }

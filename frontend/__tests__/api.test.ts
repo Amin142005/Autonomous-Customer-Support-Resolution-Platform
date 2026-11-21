@@ -104,6 +104,36 @@ describe("ApiClient", () => {
     await expect(client.me()).rejects.toBeInstanceOf(NetworkError);
   });
 
+  it("sends reply, request-info, and escalation actions", async () => {
+    const requests: Array<{ url: string; body: unknown }> = [];
+    const fetchImpl = vi.fn(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const request = new Request(input, init);
+        requests.push({ url: request.url, body: await request.json() });
+        return jsonResponse({ ticket: {}, message: "Action completed" });
+      },
+    );
+
+    const client = new ApiClient({
+      baseUrl: "http://localhost:8000",
+      fetchImpl: fetchImpl as typeof fetch,
+      getToken: () => "agent-token",
+      setToken: () => undefined,
+    });
+
+    await client.replyToTicket("ticket-1", { body: "Please try MFA again" });
+    await client.requestTicketInfo("ticket-1", { body: "Send a screenshot" });
+    await client.escalateTicket("ticket-1", {
+      body: "Needs specialist review",
+    });
+
+    expect(requests.map((item) => item.url)).toEqual([
+      "http://localhost:8000/api/v1/tickets/ticket-1/reply",
+      "http://localhost:8000/api/v1/tickets/ticket-1/request-info",
+      "http://localhost:8000/api/v1/tickets/ticket-1/escalate",
+    ]);
+  });
+
   it("sends approval decisions and workflow actions", async () => {
     const fetchImpl = vi.fn(
       async (input: RequestInfo | URL, init?: RequestInit) => {

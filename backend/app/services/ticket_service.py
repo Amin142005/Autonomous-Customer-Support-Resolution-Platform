@@ -11,6 +11,7 @@ from backend.app.repositories.tickets import (
     TicketMessageRepository,
     TicketRepository,
 )
+from backend.app.repositories.workflow import EscalationRepository
 from backend.app.schemas.common import (
     Category,
     Channel,
@@ -26,6 +27,7 @@ from backend.app.schemas.tickets import (
     TicketSummary,
     TicketWorkspaceSummary,
 )
+from backend.app.core.guardrails import validate_customer_output
 
 
 class TicketServiceError(Exception):
@@ -42,6 +44,7 @@ class TicketService:
         self.customers = CustomerRepository(session)
         self.workspaces = WorkspaceRepository(session)
         self.messages = TicketMessageRepository(session)
+        self.escalations = EscalationRepository(session)
 
     async def list(
         self,
@@ -153,3 +156,90 @@ class TicketService:
             ),
             messages=messages,
         )
+
+    async def reply(self, ticket_id: str, body: str, *, actor_id: str) -> TicketDetail:
+        ticket = await self.tickets.get_detail(ticket_id)
+        if ticket is None:
+            raise TicketServiceError("Ticket not found", 404)
+
+        normalized = body.strip()
+        valid, violations = validate_customer_output(
+            normalized,
+            allowed_customer_id=ticket.customer_id,
+            allowed_customer_name=ticket.customer.name,
+        )
+        if not valid:
+            raise TicketServiceError(
+                f"Unsafe customer reply: {', '.join(violations)}",
+                422,
+            )
+
+        await self.messages.create(
+            ticket_id=ticket_id,
+            author_type="agent",
+            author_id=actor_id,
+            body=normalized,
+        )
+        await self.tickets.update(ticket, {"status": TicketStatus.WAITING_ON_CUSTOMER})
+        await self.session.commit()
+
+        updated = await self.tickets.get_detail(ticket_id)
+        if updated is None:
+            raise TicketServiceError("Ticket not found", 404)
+        return self._detail(updated)
+
+    async def request_info(self, ticket_id: str, body: str, *, actor_id: str) -> TicketDetail:
+        ticket = await self.tickets.get_detail(ticket_id)
+        if ticket is None:
+            raise TicketServiceError("Ticket not found", 404)
+
+        normalized = body.strip()
+        valid, violations = validate_customer_output(
+            normalized,
+            allowed_customer_id=ticket.customer_id,
+            allowed_customer_name=ticket.customer.name,
+        )
+        if not valid:
+            raise TicketServiceError(
+                f"Unsafe information request: {', '.join(violations)}",
+                422,
+            )
+
+        await self.messages.create(
+            ticket_id=ticket_id,
+            author_type="agent",
+            author_id=actor_id,
+            body=normalized,
+        )
+        await self.tickets.update(ticket, {"status": TicketStatus.WAITING_ON_CUSTOMER})
+        await self.session.commit()
+
+        updated = await self.tickets.get_detail(ticket_id)
+        if updated is None:
+            raise TicketServiceError("Ticket not found", 404)
+        return self._detail(updated)
+
+    async def escalate(self, ticket_id: str, reason: str) -> TicketDetail:
+        ticket = await self.tickets.get_detail(ticket_id)
+        if ticket is None:
+            raise TicketServiceError("Ticket not found", 404)
+
+        normalized = reason.strip()
+        if not normalized:
+            raise TicketServiceError("Escalation reason is required", 422)
+
+        existing = await self.escalations.get_open_for_ticket(ticket_id)
+        if existing is None:
+            await self.escalations.create(
+                ticket_id=ticket_id,
+                team="support operations",
+                reason=normalized,
+                status="open",
+            )
+        await self.tickets.update(ticket, {"status": TicketStatus.ESCALATED})
+        await self.session.commit()
+
+        updated = await self.tickets.get_detail(ticket_id)
+        if updated is None:
+            raise TicketServiceError("Ticket not found", 404)
+        return self._detail(updated)

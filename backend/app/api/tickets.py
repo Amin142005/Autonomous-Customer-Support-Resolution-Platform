@@ -15,10 +15,12 @@ from backend.app.schemas.common import (
     TicketStatus,
 )
 from backend.app.schemas.tickets import (
+    TicketActionResponse,
     TicketCreateRequest,
     TicketCreateResponse,
     TicketDetail,
     TicketListResponse,
+    TicketReplyRequest,
 )
 from backend.app.schemas.workflow import (
     WorkflowEventResponse,
@@ -154,3 +156,53 @@ async def get_workflow_events(
         for event in events
     ]
     return WorkflowEventsResponse(items=items)
+
+
+@router.post("/{ticket_id}/reply", response_model=TicketActionResponse)
+async def reply_ticket(
+    ticket_id: str,
+    request: TicketReplyRequest,
+    current_user: AgentUser,
+    session: AsyncSession = Depends(get_session),  # noqa: B008
+) -> TicketActionResponse:
+    try:
+        detail = await TicketService(session).reply(
+            ticket_id,
+            request.body,
+            actor_id=current_user.id,
+        )
+        return TicketActionResponse(ticket=detail, message="Customer reply recorded")
+    except TicketServiceError as exc:
+        _raise_service_error(exc)
+
+
+@router.post("/{ticket_id}/request-info", response_model=TicketActionResponse)
+async def request_ticket_info(
+    ticket_id: str,
+    request: TicketReplyRequest,
+    current_user: AgentUser,
+    session: AsyncSession = Depends(get_session),  # noqa: B008
+) -> TicketActionResponse:
+    try:
+        detail = await TicketService(session).request_info(
+            ticket_id,
+            request.body,
+            actor_id=current_user.id,
+        )
+        return TicketActionResponse(ticket=detail, message="Information request recorded")
+    except TicketServiceError as exc:
+        _raise_service_error(exc)
+
+
+@router.post("/{ticket_id}/escalate", response_model=TicketActionResponse)
+async def escalate_ticket(
+    ticket_id: str,
+    request: TicketReplyRequest,
+    _current_user: AgentUser,
+    session: AsyncSession = Depends(get_session),  # noqa: B008
+) -> TicketActionResponse:
+    try:
+        detail = await TicketService(session).escalate(ticket_id, request.body)
+        return TicketActionResponse(ticket=detail, message="Ticket escalated")
+    except TicketServiceError as exc:
+        _raise_service_error(exc)
