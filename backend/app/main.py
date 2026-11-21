@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from starlette.middleware.cors import CORSMiddleware
 from starlette.types import ASGIApp
 
+from backend.app.api.approvals import router as approvals_router
 from backend.app.api.auth import router as auth_router
 from backend.app.api.customers import router as customers_router
 from backend.app.api.health import router as health_router
@@ -49,6 +50,7 @@ def create_app() -> ASGIApp:
     fastapi_app = FastAPI(title="CloudDesk Support API", lifespan=lifespan)
     fastapi_app.include_router(health_router)
     fastapi_app.include_router(auth_router, prefix="/api/v1")
+    fastapi_app.include_router(approvals_router, prefix="/api/v1")
     fastapi_app.include_router(tickets_router, prefix="/api/v1")
     fastapi_app.include_router(customers_router, prefix="/api/v1")
     fastapi_app.include_router(knowledge_router, prefix="/api/v1")

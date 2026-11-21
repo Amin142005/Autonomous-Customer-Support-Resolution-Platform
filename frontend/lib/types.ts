@@ -195,3 +195,28 @@ export interface KnowledgeReindexResponse {
   articles_indexed: number;
   chunks_indexed: number;
 }
+
+export interface WorkflowStatusResponse {
+  workflow_id: string;
+  status: string;
+  ticket_id: string;
+  thread_id: string | null;
+  state: Record<string, unknown>;
+}
+
+export interface ApprovalDecisionRequest {
+  comment?: string;
+}
+
+export interface ApprovalResponse {
+  id: string;
+  ticket_id: string;
+  workflow_id: string | null;
+  action_name: string;
+  action_args: Record<string, unknown> | null;
+  status: string;
+  decided_by: string | null;
+  reason: string | null;
+  decided_at: string | null;
+  workflow: WorkflowStatusResponse | null;
+}
