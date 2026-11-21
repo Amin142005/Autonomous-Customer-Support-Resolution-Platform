@@ -2,7 +2,7 @@
 
 import { formatLabel } from "@/lib/format";
 import type { WorkflowEvent, WorkflowStatusResponse } from "@/lib/types";
-import { WorkflowSteps } from "./WorkflowSteps";
+import { deriveWorkflowRunStatus, WorkflowSteps } from "./WorkflowSteps";
 
 interface TicketWorkflowPanelProps {
   workflow: WorkflowStatusResponse | null;
@@ -20,6 +20,7 @@ export function TicketWorkflowPanel({
   canAct = false,
 }: TicketWorkflowPanelProps) {
   const state = workflow?.state ?? {};
+  const runStatus = deriveWorkflowRunStatus(workflow?.status, state);
   const evidence = asArray(state.evidence);
   const diagnosis = state.diagnosis as Record<string, unknown> | undefined;
   const resolution = state.resolution as Record<string, unknown> | undefined;
@@ -48,6 +49,7 @@ export function TicketWorkflowPanel({
           <WorkflowSteps
             completedNodes={state.completed_nodes}
             currentNode={state.current_node}
+            runStatus={runStatus}
           />
         ) : (
           <p className="mt-4 text-sm text-slate-500">

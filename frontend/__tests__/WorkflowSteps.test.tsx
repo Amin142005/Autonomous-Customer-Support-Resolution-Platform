@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import {
   deriveSteps,
+  deriveWorkflowRunStatus,
   WORKFLOW_STEPS,
   WorkflowSteps,
 } from "@/components/tickets/WorkflowSteps";
@@ -37,5 +38,25 @@ describe("WorkflowSteps", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Understand Ticket")).toBeInTheDocument();
     expect(screen.getByText("Memory Update")).toBeInTheDocument();
+  });
+
+  it("derives paused, completed, running, and waiting workflow states", () => {
+    expect(deriveWorkflowRunStatus("paused", {})).toBe("paused");
+    expect(deriveWorkflowRunStatus("running", { paused: false })).toBe(
+      "running",
+    );
+    expect(deriveWorkflowRunStatus("completed", {})).toBe("completed");
+    expect(deriveWorkflowRunStatus(null, {})).toBe("waiting");
+  });
+
+  it("does not leave the current step active after completion", () => {
+    const steps = deriveSteps(
+      ["understand_ticket", "memory_update"],
+      "memory_update",
+      "completed",
+    );
+
+    expect(steps[0].status).toBe("completed");
+    expect(steps[11].status).toBe("completed");
   });
 });

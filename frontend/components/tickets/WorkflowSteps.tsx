@@ -19,8 +19,13 @@ export const WORKFLOW_STEPS = [
 ] as const;
 
 export type WorkflowStep = (typeof WORKFLOW_STEPS)[number];
+export type WorkflowStepStatus = "pending" | "current" | "completed";
 
-export function deriveSteps(completedNodes: unknown, currentNode: unknown) {
+export function deriveSteps(
+  completedNodes: unknown,
+  currentNode: unknown,
+  runStatus: "running" | "paused" | "completed" | "waiting" = "waiting",
+): Array<{ id: WorkflowStep; label: string; status: WorkflowStepStatus }> {
   const completed = new Set(
     Array.isArray(completedNodes)
       ? completedNodes.filter(
@@ -31,31 +36,45 @@ export function deriveSteps(completedNodes: unknown, currentNode: unknown) {
   const current = typeof currentNode === "string" ? currentNode : null;
 
   return WORKFLOW_STEPS.map((step) => {
+    const isCompleted = completed.has(step);
     const isCurrent = current === step;
+
+    let status: WorkflowStepStatus = "pending";
+    if (isCompleted) status = "completed";
+    if (isCurrent && runStatus !== "completed") status = "current";
+
     return {
       id: step,
       label: formatLabel(step),
-      status: completed.has(step)
-        ? isCurrent
-          ? "current"
-          : "completed"
-        : isCurrent
-          ? "current"
-          : "pending",
+      status,
     };
   });
+}
+
+export function deriveWorkflowRunStatus(
+  workflowStatus: unknown,
+  state: Record<string, unknown>,
+): "running" | "paused" | "completed" | "waiting" {
+  if (workflowStatus === "paused" || state.paused === true) return "paused";
+  if (workflowStatus === "completed") return "completed";
+  if (typeof workflowStatus === "string" && workflowStatus.length > 0) {
+    return "running";
+  }
+  return "waiting";
 }
 
 interface WorkflowStepsProps {
   completedNodes?: unknown;
   currentNode?: unknown;
+  runStatus?: "running" | "paused" | "completed" | "waiting";
 }
 
 export function WorkflowSteps({
   completedNodes,
   currentNode,
+  runStatus = "waiting",
 }: WorkflowStepsProps) {
-  const steps = deriveSteps(completedNodes, currentNode);
+  const steps = deriveSteps(completedNodes, currentNode, runStatus);
 
   return (
     <ol aria-label="Workflow steps" className="space-y-2">
