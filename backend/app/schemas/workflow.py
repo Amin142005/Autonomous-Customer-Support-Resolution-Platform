@@ -127,6 +127,23 @@ class WorkflowEventsResponse(BaseModel):
     items: list[WorkflowEventResponse] = Field(default_factory=list)
 
 
+class ApprovalDecisionRequest(BaseModel):
+    comment: str = Field(default="", max_length=2000)
+
+
+class ApprovalResponse(BaseModel):
+    id: str
+    ticket_id: str
+    workflow_id: str | None = None
+    action_name: str
+    action_args: dict[str, Any] | None = None
+    status: str
+    decided_by: str | None = None
+    reason: str | None = None
+    decided_at: datetime | None = None
+    workflow: WorkflowStatusResponse | None = None
+
+
 class StructuredLLMResult(BaseModel):
     output: object
     token_usage: TokenUsage = Field(default_factory=TokenUsage)
@@ -135,6 +152,8 @@ class StructuredLLMResult(BaseModel):
 
 __all__ = [
     "ActionProposal",
+    "ApprovalDecisionRequest",
+    "ApprovalResponse",
     "Classification",
     "CustomerContext",
     "Diagnosis",
