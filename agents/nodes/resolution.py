@@ -154,6 +154,7 @@ async def risk_check(state: SupportState) -> dict[str, Any]:
 
     return {
         "risk_level": risk_level,
+        "escalation_required": bool(policy_matches),
         "approval_required": approval_required,
         "completed_nodes": ["risk_check"],
         "current_node": "risk_check",

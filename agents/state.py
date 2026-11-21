@@ -42,9 +42,15 @@ def merge_usage(
 ) -> TokenUsage:
     """Sum token usage across workflow nodes."""
 
-    def to_usage(value: TokenUsage | Mapping[str, Any] | None) -> TokenUsage:
+    def to_usage(value: Any) -> TokenUsage:
         if isinstance(value, TokenUsage):
             return value
+        if hasattr(value, "input_tokens") or hasattr(value, "output_tokens") or hasattr(value, "cost"):
+            return TokenUsage(
+                input_tokens=int(getattr(value, "input_tokens", 0) or 0),
+                output_tokens=int(getattr(value, "output_tokens", 0) or 0),
+                cost=float(getattr(value, "cost", 0.0) or 0.0),
+            )
         if isinstance(value, Mapping):
             try:
                 return TokenUsage.model_validate(value)
@@ -58,8 +64,8 @@ def merge_usage(
     cost = totals.cost
 
     if right is None:
-        values: Sequence[TokenUsage | Mapping[str, Any]] = ()
-    elif isinstance(right, (TokenUsage, Mapping)):
+        values: Sequence[Any] = ()
+    elif isinstance(right, (TokenUsage, Mapping)) or hasattr(right, "input_tokens"):
         values = (right,)
     else:
         values = right
@@ -99,6 +105,7 @@ class SupportState(TypedDict, total=False):
     escalation: EscalationDecision | None
 
     risk_level: str
+    escalation_required: bool
     approval_required: bool
     approval_status: str
     approval_id: str | None
