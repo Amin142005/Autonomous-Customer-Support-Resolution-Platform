@@ -13,7 +13,7 @@ BOOTSTRAP_PYTHON ?= python
 
 export PYTHONPATH
 
-.PHONY: setup test lint backend ingest
+.PHONY: setup test lint backend ingest demo
 
 setup:
 	$(BOOTSTRAP_PYTHON) -m venv .venv
@@ -32,3 +32,6 @@ backend:
 
 ingest:
 	$(PYTHON) -m backend.app.cli.ingest_knowledge
+
+demo:
+	$(PYTHON) -m backend.app.cli.demo
