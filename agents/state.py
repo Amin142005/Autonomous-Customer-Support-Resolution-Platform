@@ -102,6 +102,7 @@ class SupportState(TypedDict, total=False):
     previous_cases: list[PreviousCase]
     diagnosis: Diagnosis | None
     resolution: ResolutionPlan | None
+    resolution_execution: list[dict[str, Any]]
     escalation: EscalationDecision | None
 
     risk_level: str

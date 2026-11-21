@@ -115,9 +115,33 @@ async def human_approval(state: SupportState) -> dict[str, object]:
 
 
 async def execute_resolution(state: SupportState) -> dict[str, object]:
-    """Placeholder for P11 shared tool execution; no action executes in P10-5."""
-    del state
+    """Execute planned actions through the shared ToolRegistry path."""
+    from collections.abc import Mapping
+
+    registry = state.get("tool_registry") or state.get("registry")
+    if registry is None:
+        from backend.app.tools.registry import ToolRegistry
+
+        registry = ToolRegistry()
+
+    resolution = state.get("resolution")
+    if isinstance(resolution, Mapping):
+        proposals = resolution.get("actions", [])
+    else:
+        proposals = getattr(resolution, "actions", []) if resolution is not None else []
+
+    from backend.app.services.resolution_execution_service import ResolutionExecutionService
+
+    executor = ResolutionExecutionService(session=None, registry=registry)
+    execution_results = await executor.execute(
+        ticket_id=str(state.get("ticket_id") or ""),
+        workflow_id=str(state.get("workflow_id") or ""),
+        proposals=list(proposals),
+        approval_status=state.get("approval_status"),
+    )
+
     return {
+        "resolution_execution": execution_results,
         "completed_nodes": ["execute_resolution"],
         "current_node": "execute_resolution",
     }

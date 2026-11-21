@@ -200,6 +200,54 @@ class WorkflowService:
                                 previous_completed.add(name)
                                 await tracer.node_completed(name, duration_ms=0)
 
+                    execution = final_state.get("resolution_execution")
+                    if isinstance(execution, list) and execution:
+                        from backend.app.repositories.workflow import ResolutionActionRepository
+
+                        action_repository = ResolutionActionRepository(self.session)
+                        approval_id = final_state.get("approval_id")
+                        approved_by = None
+                        if approval_id:
+                            approval = await self.approvals.get_by_id(str(approval_id))
+                            approved_by = approval.decided_by if approval is not None else None
+
+                        existing_actions = await action_repository.list_for_ticket(ticket_id)
+                        existing_keys = {
+                            (item.tool_name, str(item.args or {}), item.status)
+                            for item in existing_actions
+                        }
+                        for item in execution:
+                            if not isinstance(item, Mapping):
+                                continue
+                            tool_name = str(item.get("tool", "unknown"))
+                            arguments = (
+                                dict(item.get("arguments", {}))
+                                if isinstance(item.get("arguments"), Mapping)
+                                else {}
+                            )
+                            status = str(item.get("status", "unknown"))
+                            key = (tool_name, str(arguments), status)
+                            if key in existing_keys:
+                                continue
+                            await action_repository.create(
+                                ticket_id=ticket_id,
+                                workflow_id=workflow_id,
+                                tool_name=tool_name,
+                                args=arguments,
+                                status=status,
+                                result=(
+                                    dict(item.get("output", {}))
+                                    if isinstance(item.get("output"), Mapping)
+                                    else None
+                                ),
+                                approved_by=(
+                                    approved_by
+                                    if bool(item.get("approval_required", False))
+                                    else None
+                                ),
+                            )
+                            existing_keys.add(key)
+
                     usage = final_state.get("token_usage")
                     if usage is not None:
                         current_node = str(final_state.get("current_node") or "workflow")
