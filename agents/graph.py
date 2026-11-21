@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Literal
 
 from langgraph.graph import END, START, StateGraph
+from langgraph.types import interrupt
 
 from agents.nodes.investigate import (
     customer_context,
@@ -73,11 +74,40 @@ async def escalation(state: SupportState) -> dict[str, object]:
 
 
 async def human_approval(state: SupportState) -> dict[str, object]:
-    """Placeholder for P11: mark consequential work as pending approval."""
-    del state
+    """Pause consequential workflows until a human decision is recorded."""
+    resolution = state.get("resolution")
+    actions = (
+        [
+            {
+                "tool": action.tool,
+                "arguments": action.arguments,
+                "approval_required": action.approval_required,
+                "rationale": action.rationale,
+            }
+            for action in getattr(resolution, "actions", [])
+            if bool(getattr(action, "approval_required", False))
+        ]
+        if resolution is not None
+        else []
+    )
+
+    decision = interrupt({
+        "kind": "human_approval",
+        "ticket_id": state.get("ticket_id") or "",
+        "workflow_id": state.get("workflow_id") or "",
+        "actions": actions,
+    })
+
+    resumed = (
+        decision
+        if isinstance(decision, dict)
+        else {"decision": str(decision)}
+    )
+    approved = str(resumed.get("decision", "")).casefold() in {"approve", "approved", "true", "yes"}
+
     return {
-        "approval_status": "pending",
-        "paused": True,
+        "approval_status": "approved" if approved else "rejected",
+        "paused": False,
         "completed_nodes": ["human_approval"],
         "current_node": "human_approval",
     }
