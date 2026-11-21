@@ -29,7 +29,12 @@ export default function TicketDetailPage() {
     return { ticket, workflow, events: events.items };
   }, [ticketId]);
 
-  const { data, loading, error, reload } = usePolling(loader, 2000);
+  const { data, loading, refreshing, pollingEnabled, error, reload } =
+    usePolling(loader, 2000, {
+      stopWhen: (result) =>
+        result.workflow?.status === "completed" ||
+        result.workflow?.status === "paused",
+    });
 
   if (loading) return <LoadingState label="Loading ticket workspace..." />;
 
@@ -54,6 +59,16 @@ export default function TicketDetailPage() {
               <StatusPill value={data.ticket.status} />
             </div>
           </div>
+
+          {refreshing ? (
+            <p className="text-xs font-medium text-slate-500" role="status">
+              Refreshing workflow...
+            </p>
+          ) : pollingEnabled ? null : (
+            <p className="text-xs font-medium text-slate-500" role="status">
+              Workflow updates complete
+            </p>
+          )}
 
           <div className="grid items-start gap-4 lg:grid-cols-2 xl:grid-cols-[minmax(0,1.15fr)_minmax(260px,.75fr)_minmax(320px,1.1fr)]">
             <TicketMessagesColumn
