@@ -109,6 +109,13 @@ class SupportState(TypedDict, total=False):
     errors: Annotated[list[str], append_errors]
     token_usage: Annotated[TokenUsage, merge_usage]
 
+    # Runtime dependencies injected by the workflow service when building a run.
+    registry: Any
+    tool_registry: Any
+    memory_service: Any
+    memory: Any
+    llm: Any
+
 
 __all__ = [
     "SupportState",
