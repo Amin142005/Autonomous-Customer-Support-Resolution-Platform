@@ -1,4 +1,5 @@
 from __future__ import annotations
+from datetime import datetime
 
 from typing import Any
 
@@ -110,6 +111,22 @@ class WorkflowStatusResponse(BaseModel):
     state: dict[str, Any] = Field(default_factory=dict)
 
 
+class WorkflowEventResponse(BaseModel):
+    id: str
+    ticket_id: str
+    workflow_id: str | None = None
+    event_type: str
+    node_name: str | None = None
+    payload: dict[str, Any] | None = None
+    duration_ms: int | None = None
+    token_usage: dict[str, Any] | None = None
+    created_at: datetime
+
+
+class WorkflowEventsResponse(BaseModel):
+    items: list[WorkflowEventResponse] = Field(default_factory=list)
+
+
 class StructuredLLMResult(BaseModel):
     output: object
     token_usage: TokenUsage = Field(default_factory=TokenUsage)
@@ -130,4 +147,6 @@ __all__ = [
     "TokenUsage",
     "WorkflowRunResponse",
     "WorkflowStatusResponse",
+    "WorkflowEventResponse",
+    "WorkflowEventsResponse",
 ]

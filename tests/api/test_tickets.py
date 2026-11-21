@@ -14,6 +14,8 @@ from backend.app.models.entities import (
     Profile,
     Ticket,
     TicketMessage,
+    WorkflowEvent,
+    WorkflowRun,
     Workspace,
 )
 from backend.app.schemas.common import (
@@ -296,3 +298,61 @@ async def test_run_workflow_requires_agent_and_viewers_can_read_status(tickets_a
     assert isinstance(workflow_id, str) and workflow_id
     assert status_response.status_code == 200
     assert status_response.json()["workflow_id"] == workflow_id
+
+
+async def test_workflow_events_require_viewer_and_preserve_order(tickets_app):
+    viewer_token = token_for(
+        "viewer-id",
+        "vic.viewer@clouddesk.demo",
+        "viewer",
+    )
+
+    async with tickets_app.state.session_factory() as session:
+        run = WorkflowRun(
+            id="workflow-events-1",
+            ticket_id="ticket-1",
+            status="completed",
+            state={"completed_nodes": ["understand_ticket"]},
+            thread_id="workflow-events-1",
+        )
+        session.add(run)
+        await session.flush()
+        session.add_all([
+            WorkflowEvent(
+                ticket_id="ticket-1",
+                workflow_id=run.id,
+                event_type="node_started",
+                node_name="understand_ticket",
+                payload={"status": "started"},
+            ),
+            WorkflowEvent(
+                ticket_id="ticket-1",
+                workflow_id=run.id,
+                event_type="node_completed",
+                node_name="understand_ticket",
+                payload={"status": "completed"},
+                duration_ms=12,
+                token_usage={"input_tokens": 10, "output_tokens": 4, "cost": 0.0},
+            ),
+        ])
+        await session.commit()
+
+    async with AsyncClient(
+        transport=ASGITransport(app=tickets_app),
+        base_url="http://testserver",
+    ) as client:
+        response = await client.get(
+            "/api/v1/tickets/ticket-1/events",
+            headers={"Authorization": f"Bearer {viewer_token}"},
+        )
+        missing = await client.get(
+            "/api/v1/tickets/missing/events",
+            headers={"Authorization": f"Bearer {viewer_token}"},
+        )
+
+    assert response.status_code == 200
+    assert [item["event_type"] for item in response.json()["items"]] == [
+        "node_started",
+        "node_completed",
+    ]
+    assert missing.status_code == 404

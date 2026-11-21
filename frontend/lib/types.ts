@@ -175,6 +175,22 @@ export interface KnowledgeSearchResponse {
   items: KnowledgeEvidence[];
 }
 
+export interface WorkflowEvent {
+  id: string;
+  ticket_id: string;
+  workflow_id: string | null;
+  event_type: string;
+  node_name: string | null;
+  payload: Record<string, unknown> | null;
+  duration_ms: number | null;
+  token_usage: Record<string, unknown> | null;
+  created_at: string;
+}
+
+export interface WorkflowEventsResponse {
+  items: WorkflowEvent[];
+}
+
 export interface KnowledgeReindexResponse {
   articles_indexed: number;
   chunks_indexed: number;

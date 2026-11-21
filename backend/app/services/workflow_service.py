@@ -9,11 +9,15 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from agents.checkpointer import create_checkpointer
+from agents.tracer import WorkflowTracer
 from agents.graph import build_support_graph
 from backend.app.core.llm import get_llm
 from backend.app.models.entities import Ticket, WorkflowRun
 from backend.app.repositories.tickets import TicketRepository
-from backend.app.repositories.workflow import WorkflowRunRepository
+from backend.app.repositories.workflow import (
+    WorkflowEventRepository,
+    WorkflowRunRepository,
+)
 from backend.app.schemas.common import TicketStatus
 from backend.app.schemas.workflow import WorkflowRunResponse, WorkflowStatusResponse
 from backend.app.tools.registry import ToolRegistry
@@ -37,6 +41,7 @@ class WorkflowService:
     ) -> None:
         self.session = session
         self.runs = WorkflowRunRepository(session)
+        self.events = WorkflowEventRepository(session)
         self.tickets = TicketRepository(session)
         self.registry = registry or ToolRegistry()
         provider = llm if llm is not None else get_llm()
@@ -89,6 +94,14 @@ class WorkflowService:
             raise WorkflowServiceError("Workflow not found", 404)
 
         initial_state = run.state or await self._initial_state(ticket, workflow_id, workflow_id)
+        tracer = WorkflowTracer(
+            self.session,
+            ticket_id=ticket_id,
+            workflow_id=workflow_id,
+        )
+        previous_started: set[str] = set()
+        previous_completed: set[str] = set()
+        previous_tools: set[tuple[str, str]] = set()
         async with create_checkpointer() as checkpointer:
             graph = build_support_graph(checkpointer=checkpointer)
             final_state: dict[str, Any] = dict(initial_state)
@@ -101,8 +114,42 @@ class WorkflowService:
                     final_state = update
                     run.state = self._safe_state(final_state)
                     run.status = "paused" if final_state.get("paused") else "completed"
+
+                    current_node = str(final_state.get("current_node") or "")
+                    if current_node and current_node not in previous_started:
+                        previous_started.add(current_node)
+                        await tracer.node_started(current_node)
+
+                    tool_names = {
+                        "customer_context": ("get_customer", "get_subscription", "get_ticket_history"),
+                        "knowledge_retrieval": ("search_docs",),
+                        "troubleshooting": ("check_service_status",),
+                    }
+                    if current_node in tool_names:
+                        for tool_name in tool_names[current_node]:
+                            key = (current_node, tool_name)
+                            if key not in previous_tools:
+                                previous_tools.add(key)
+                                await tracer.tool_called(tool_name, node_name=current_node)
+
+                    completed = final_state.get("completed_nodes", [])
+                    if isinstance(completed, (list, tuple)):
+                        for node_name in completed:
+                            name = str(node_name)
+                            if name and name not in previous_completed:
+                                previous_completed.add(name)
+                                await tracer.node_completed(name, duration_ms=0)
+
+                    usage = final_state.get("token_usage")
+                    if usage is not None:
+                        current_node = str(final_state.get("current_node") or "workflow")
+                        await tracer.llm_called(
+                            node_name=current_node,
+                            usage=usage,
+                        )
                     await self.session.flush()
 
+            await tracer.workflow_completed()
             await self.session.commit()
 
         return self._status(run, final_state)
