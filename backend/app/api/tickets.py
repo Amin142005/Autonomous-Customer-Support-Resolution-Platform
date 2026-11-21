@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.core.database import get_session
 from backend.app.core.security import AuthenticatedUser, require_role
+from backend.app.repositories.workflow import WorkflowEventRepository, WorkflowRunRepository
 from backend.app.schemas.common import (
     Category,
     Role,
@@ -20,6 +21,8 @@ from backend.app.schemas.tickets import (
     TicketListResponse,
 )
 from backend.app.schemas.workflow import (
+    WorkflowEventResponse,
+    WorkflowEventsResponse,
     WorkflowRunResponse,
     WorkflowStatusResponse,
 )
@@ -118,3 +121,36 @@ async def get_workflow(
         return await WorkflowService(session).get_status(ticket_id)
     except WorkflowServiceError as exc:
         raise HTTPException(status_code=exc.status_code, detail=exc.detail)
+
+
+@router.get("/{ticket_id}/events", response_model=WorkflowEventsResponse)
+async def get_workflow_events(
+    ticket_id: str,
+    _current_user: ViewerUser,
+    session: AsyncSession = Depends(get_session),  # noqa: B008
+) -> WorkflowEventsResponse:
+    try:
+        await TicketService(session).get_detail(ticket_id)
+    except TicketServiceError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.detail)
+
+    run = await WorkflowRunRepository(session).get_latest_for_ticket(ticket_id)
+    if run is None:
+        return WorkflowEventsResponse(items=[])
+
+    events = await WorkflowEventRepository(session).list_for_workflow(run.id)
+    items = [
+        WorkflowEventResponse(
+            id=event.id,
+            ticket_id=event.ticket_id,
+            workflow_id=event.workflow_id,
+            event_type=event.event_type,
+            node_name=event.node_name,
+            payload=event.payload,
+            duration_ms=event.duration_ms,
+            token_usage=event.token_usage,
+            created_at=event.created_at,
+        )
+        for event in events
+    ]
+    return WorkflowEventsResponse(items=items)
