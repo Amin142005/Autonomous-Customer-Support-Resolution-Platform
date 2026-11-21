@@ -3,6 +3,19 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { AppShell } from "@/components/layout/AppShell";
 
+vi.mock("@/lib/auth", () => ({
+  useAuth: () => ({
+    user: {
+      id: "profile-1",
+      email: "sam.agent@clouddesk.demo",
+      full_name: "Sam Agent",
+      role: "agent",
+    },
+    loading: false,
+    signOut: vi.fn(),
+  }),
+}));
+
 vi.mock("next/link", () => ({
   default: ({
     children,

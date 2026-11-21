@@ -1,9 +1,17 @@
+"use client";
+
 import Link from "next/link";
-import { navItems } from "./nav";
+import { RoleAwareNav } from "./RoleAwareNav";
+import { useAuth } from "@/lib/auth";
 
 export function AppShell({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const { user, signOut, loading } = useAuth();
+
+  if (loading) return <>{children}</>;
+  if (!user) return <>{children}</>;
+
   return (
     <div className="min-h-screen bg-canvas text-ink">
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-slate-200 bg-white lg:flex lg:flex-col">
@@ -19,24 +27,16 @@ export function AppShell({
             <p className="text-xs text-slate-500">Support Console</p>
           </div>
         </Link>
-        <nav
-          aria-label="Primary navigation"
-          className="flex-1 space-y-1 overflow-y-auto px-3 py-5"
-        >
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-950"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        <RoleAwareNav />
         <div className="border-t border-slate-200 p-4">
           <div className="rounded-lg bg-slate-50 px-3 py-3">
             <p className="text-xs font-medium text-slate-500">Signed in as</p>
-            <p className="mt-1 text-sm font-semibold">Demo Agent</p>
+            <p className="mt-1 truncate text-sm font-semibold">
+              {user.full_name}
+            </p>
+            <p className="mt-0.5 text-xs capitalize text-slate-500">
+              {user.role}
+            </p>
           </div>
         </div>
       </aside>
@@ -53,10 +53,11 @@ export function AppShell({
           </p>
           <button
             type="button"
+            onClick={signOut}
             className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium hover:bg-slate-50"
-            aria-label="Open user menu"
+            aria-label="Sign out"
           >
-            Agent
+            Sign out
           </button>
         </header>
         <main className="mx-auto max-w-[1440px] p-4 lg:p-8">{children}</main>
