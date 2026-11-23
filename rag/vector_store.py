@@ -327,6 +327,8 @@ class QdrantVectorStore:
 
     async def count(self) -> int:
         client = self._client_instance()
+        if not await client.collection_exists(collection_name=self.collection):
+            return 0
         result = await client.count(collection_name=self.collection)
         return int(result.count)
 

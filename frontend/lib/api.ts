@@ -126,7 +126,10 @@ export class ApiClient {
     ).replace(/\/$/, "");
     this.getToken = options.getToken ?? browserGetToken;
     this.setToken = options.setToken ?? browserSetToken;
-    this.fetchImpl = options.fetchImpl ?? fetch;
+    // Wrap the global fetch: calling it as `this.fetchImpl(...)` would bind
+    // `this` to ApiClient and browsers throw "Illegal invocation".
+    this.fetchImpl =
+      options.fetchImpl ?? ((input, init) => globalThis.fetch(input, init));
   }
 
   setAccessToken(token: string | null): void {
